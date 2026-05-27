@@ -1,4 +1,3 @@
-import { redirect } from 'next/navigation'
 import { createServerClient } from '@/lib/supabase/server'
 import AdminNav from '@/components/AdminNav'
 
@@ -6,7 +5,11 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const supabase = await createServerClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  if (!user) redirect('/admin/login')
+  // Login page is also inside this layout, so don't redirect here.
+  // proxy.ts handles redirecting unauthenticated requests to /admin/login.
+  if (!user) {
+    return <>{children}</>
+  }
 
   return (
     <div className="min-h-screen bg-slate-100">
