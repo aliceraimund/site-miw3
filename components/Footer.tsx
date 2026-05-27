@@ -28,8 +28,9 @@ export default function Footer() {
             </a>
           </div>
         </div>
-        <div className="mt-8 border-t border-slate-700 pt-6 text-xs text-slate-500 text-center">
-          © {new Date().getFullYear()} MIW3. Todos os direitos reservados.
+        <div className="mt-8 border-t border-slate-700 pt-6 text-xs text-slate-500 flex items-center justify-between">
+          <span>© {new Date().getFullYear()} MIW3. Todos os direitos reservados.</span>
+          <a href="/admin/login" className="hover:text-slate-300 transition-colors">Área administrativa</a>
         </div>
       </div>
     </footer>
