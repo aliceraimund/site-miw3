@@ -1,4 +1,5 @@
 import { Suspense } from 'react'
+import Image from 'next/image'
 import { createServerClient } from '@/lib/supabase/server'
 import ImovelCard from '@/components/ImovelCard'
 import FilterBar from '@/components/FilterBar'
@@ -71,27 +72,34 @@ export default async function HomePage({
       <div className="relative bg-slate-900 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-blue-900/60 via-slate-900 to-slate-900" />
         <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '32px 32px' }} />
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20">
-          <p className="text-blue-400 text-sm font-semibold uppercase tracking-widest mb-3">Portfólio MIW3</p>
-          <h1 className="text-4xl md:text-5xl font-bold text-white leading-tight max-w-2xl">
-            Encontre o Imóvel Certo para o Seu Negócio
-          </h1>
-          <p className="mt-4 text-slate-400 text-lg max-w-xl leading-relaxed">
-            Apartamentos, galpões, salas, lojas e terrenos para venda e locação.
-          </p>
-          <div className="mt-8 flex flex-wrap gap-6 text-sm text-slate-400">
-            <span className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-blue-500 inline-block" />
-              Imóveis selecionados
-            </span>
-            <span className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-blue-500 inline-block" />
-              Atendimento personalizado
-            </span>
-            <span className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-blue-500 inline-block" />
-              Venda e locação
-            </span>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20 flex flex-col md:flex-row md:items-center md:justify-between gap-10">
+          <div className="flex-1">
+            <p className="text-blue-400 text-sm font-semibold uppercase tracking-widest mb-3">Portfólio MIW3</p>
+            <h1 className="text-4xl md:text-5xl font-bold text-white leading-tight">
+              Encontre o Imóvel Certo para o Seu Negócio
+            </h1>
+            <p className="mt-4 text-slate-400 text-lg leading-relaxed">
+              Apartamentos, galpões, salas, lojas e terrenos para venda e locação.
+            </p>
+            <div className="mt-8 flex flex-wrap gap-6 text-sm text-slate-400">
+              <span className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-blue-500 inline-block" />
+                Imóveis selecionados
+              </span>
+              <span className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-blue-500 inline-block" />
+                Atendimento personalizado
+              </span>
+              <span className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-blue-500 inline-block" />
+                Venda e locação
+              </span>
+            </div>
+          </div>
+          <div className="flex-shrink-0 flex items-center justify-center">
+            <a href="/">
+              <Image src="/logo-miw3.png" alt="MIW3" width={420} height={180} className="w-72 md:w-96 lg:w-[420px] h-auto" />
+            </a>
           </div>
         </div>
       </div>
