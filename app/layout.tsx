@@ -6,8 +6,8 @@ import Footer from '@/components/Footer'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'MIW3 – Imóveis Comerciais',
-  description: 'Portfólio de imóveis comerciais MIW3. Galpões, salas comerciais, lojas e muito mais.',
+  title: 'MIW3 – Imóveis',
+  description: 'Portfólio de imóveis MIW3. Apartamentos, galpões, salas, lojas, terrenos e muito mais.',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
