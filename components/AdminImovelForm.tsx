@@ -31,6 +31,7 @@ const INITIAL: FormData = {
   fotos: null,
   descricao: null,
   destaque: false,
+  valor_livre: false,
 }
 
 function Field({ label, children, required, hint }: { label: string; children: React.ReactNode; required?: boolean; hint?: string }) {
@@ -191,17 +192,30 @@ export default function AdminImovelForm({ imovel }: Props) {
 
         {(dp === 'venda' || dp === 'ambos') && (
           <Field label="Preço de venda (R$)">
-            <input type="number" min="0" step="1" value={form.preco_venda ?? ''} onChange={(e) => set('preco_venda', numOrNull(e.target.value))} className={inputClass} placeholder="1500000" />
+            <input type="number" min="0" step="0.01" value={form.preco_venda ?? ''} onChange={(e) => set('preco_venda', numOrNull(e.target.value))} className={inputClass} placeholder="1500000" />
           </Field>
         )}
 
         {(dp === 'locacao' || dp === 'ambos') && (
           <>
-            <Field label="Preço de locação mensal (R$)" hint="Valor livre ao proprietário — comissão de administração a acrescer">
-              <input type="number" min="0" step="1" value={form.preco_locacao ?? ''} onChange={(e) => set('preco_locacao', numOrNull(e.target.value))} className={inputClass} placeholder="8000" />
+            <Field label="Preço de locação mensal (R$)">
+              <input type="number" min="0" step="0.01" value={form.preco_locacao ?? ''} onChange={(e) => set('preco_locacao', numOrNull(e.target.value))} className={inputClass} placeholder="8000" />
+            </Field>
+            <Field label="Valor Livre?">
+              <label className="flex items-center gap-3 mt-1 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={form.valor_livre}
+                  onChange={(e) => set('valor_livre', e.target.checked)}
+                  className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                />
+                <span className="text-sm text-slate-700">
+                  Exibir no anúncio: <span className="italic text-slate-500">"Valor livre ao proprietário — comissão de administração a acrescer"</span>
+                </span>
+              </label>
             </Field>
             <Field label="IPTU mensal (R$)">
-              <input type="number" min="0" step="1" value={form.iptu ?? ''} onChange={(e) => set('iptu', numOrNull(e.target.value))} className={inputClass} placeholder="1200" />
+              <input type="number" min="0" step="0.01" value={form.iptu ?? ''} onChange={(e) => set('iptu', numOrNull(e.target.value))} className={inputClass} placeholder="1200" />
             </Field>
           </>
         )}
