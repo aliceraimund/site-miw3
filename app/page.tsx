@@ -66,33 +66,60 @@ export default async function HomePage({
   const sp = await searchParams
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-900">Imóveis Disponíveis</h1>
-        <p className="text-slate-500 mt-1">Conheça nosso portfólio de imóveis comerciais</p>
+    <div>
+      {/* Hero */}
+      <div className="relative bg-slate-900 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-900/60 via-slate-900 to-slate-900" />
+        <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '32px 32px' }} />
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20">
+          <p className="text-blue-400 text-sm font-semibold uppercase tracking-widest mb-3">Portfólio MIW3</p>
+          <h1 className="text-4xl md:text-5xl font-bold text-white leading-tight max-w-2xl">
+            Imóveis Comerciais de Alto Padrão
+          </h1>
+          <p className="mt-4 text-slate-400 text-lg max-w-xl leading-relaxed">
+            Galpões, salas, lojas e terrenos para venda e locação em São Paulo e região.
+          </p>
+          <div className="mt-8 flex flex-wrap gap-6 text-sm text-slate-400">
+            <span className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-blue-500 inline-block" />
+              Imóveis selecionados
+            </span>
+            <span className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-blue-500 inline-block" />
+              Atendimento personalizado
+            </span>
+            <span className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-blue-500 inline-block" />
+              Venda e locação
+            </span>
+          </div>
+        </div>
       </div>
 
-      <Suspense fallback={<div className="h-20 bg-white rounded-xl animate-pulse mb-8" />}>
-        <TiposLoader>
-          {(tipos) => (
-            <Suspense>
-              <FilterBar tipos={tipos} />
-            </Suspense>
-          )}
-        </TiposLoader>
-      </Suspense>
+      {/* Listings */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <Suspense fallback={<div className="h-20 bg-white rounded-xl animate-pulse mb-8" />}>
+          <TiposLoader>
+            {(tipos) => (
+              <Suspense>
+                <FilterBar tipos={tipos} />
+              </Suspense>
+            )}
+          </TiposLoader>
+        </Suspense>
 
-      <Suspense
-        fallback={
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="bg-white rounded-xl h-80 animate-pulse shadow-sm" />
-            ))}
-          </div>
-        }
-      >
-        <ImovelGrid searchParams={sp} />
-      </Suspense>
+        <Suspense
+          fallback={
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="bg-white rounded-xl h-80 animate-pulse shadow-sm" />
+              ))}
+            </div>
+          }
+        >
+          <ImovelGrid searchParams={sp} />
+        </Suspense>
+      </div>
     </div>
   )
 }

@@ -33,6 +33,7 @@ const INITIAL: FormData = {
   destaque: false,
   valor_livre: false,
   valor_livre_venda: false,
+  condominio: null,
 }
 
 function Field({ label, children, required, hint }: { label: string; children: React.ReactNode; required?: boolean; hint?: string }) {
@@ -235,6 +236,10 @@ export default function AdminImovelForm({ imovel }: Props) {
             </Field>
           </>
         )}
+
+        <Field label="Condomínio mensal (R$)">
+          <input type="number" min="0" step="0.01" value={form.condominio ?? ''} onChange={(e) => set('condominio', numOrNull(e.target.value))} className={inputClass} placeholder="800" />
+        </Field>
       </div>
 
       <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-5">

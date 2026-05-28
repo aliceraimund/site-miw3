@@ -23,5 +23,6 @@ export interface Imovel {
   destaque: boolean
   valor_livre: boolean
   valor_livre_venda: boolean
+  condominio: number | null
   criado_em: string
 }

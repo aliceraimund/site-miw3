@@ -2,7 +2,7 @@ import { type Imovel } from '@/types/imovel'
 import { formatCurrency } from '@/lib/utils'
 
 interface Props {
-  imovel: Pick<Imovel, 'disponivel_para' | 'preco_venda' | 'preco_locacao' | 'iptu' | 'valor_livre' | 'valor_livre_venda'>
+  imovel: Pick<Imovel, 'disponivel_para' | 'preco_venda' | 'preco_locacao' | 'iptu' | 'condominio' | 'valor_livre' | 'valor_livre_venda'>
   compact?: boolean
 }
 
@@ -13,7 +13,7 @@ const ValorLivreNotice = () => (
 )
 
 export default function PriceDisplay({ imovel, compact = false }: Props) {
-  const { disponivel_para, preco_venda, preco_locacao, iptu, valor_livre, valor_livre_venda } = imovel
+  const { disponivel_para, preco_venda, preco_locacao, iptu, condominio, valor_livre, valor_livre_venda } = imovel
 
   if (compact) {
     return (
@@ -47,6 +47,11 @@ export default function PriceDisplay({ imovel, compact = false }: Props) {
           ) : (
             <p className="text-slate-500 italic">Consultar</p>
           )}
+          {condominio && disponivel_para === 'venda' && (
+            <p className="text-sm text-slate-600 mt-2">
+              Condomínio: <span className="font-medium">{formatCurrency(condominio)}/mês</span>
+            </p>
+          )}
         </div>
       )}
 
@@ -67,6 +72,11 @@ export default function PriceDisplay({ imovel, compact = false }: Props) {
           {iptu && (
             <p className="text-sm text-slate-600 mt-2">
               IPTU: <span className="font-medium">{formatCurrency(iptu)}/mês</span>
+            </p>
+          )}
+          {condominio && (
+            <p className="text-sm text-slate-600 mt-1">
+              Condomínio: <span className="font-medium">{formatCurrency(condominio)}/mês</span>
             </p>
           )}
         </div>

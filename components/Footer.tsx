@@ -1,11 +1,16 @@
+import Image from 'next/image'
+
 export default function Footer() {
   return (
     <footer className="bg-slate-900 text-slate-300 mt-auto">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-          <div>
-            <span className="text-2xl font-bold text-white tracking-tight">MIW3</span>
-            <p className="mt-1 text-sm text-slate-400">Imóveis Comerciais</p>
+          <div className="flex items-center gap-3">
+            <Image src="/logo-miw3.svg" alt="MIW3" width={20} height={28} className="h-7 w-auto opacity-90" />
+            <div>
+              <span className="text-2xl font-bold text-white tracking-tight">MIW3</span>
+              <p className="text-sm text-slate-400">Imóveis Comerciais</p>
+            </div>
           </div>
           <div className="flex flex-col sm:flex-row gap-4 text-sm">
             <a

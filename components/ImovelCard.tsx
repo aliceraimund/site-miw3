@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { type Imovel } from '@/types/imovel'
-import { formatArea, STATUS_LABELS, STATUS_COLORS, DISPONIVEL_LABELS, DISPONIVEL_COLORS } from '@/lib/utils'
+import { formatArea, formatCurrency, STATUS_LABELS, STATUS_COLORS, DISPONIVEL_LABELS, DISPONIVEL_COLORS } from '@/lib/utils'
 import PriceDisplay from './PriceDisplay'
 
 interface Props {
@@ -12,7 +12,16 @@ export default function ImovelCard({ imovel }: Props) {
   const mainPhoto = imovel.fotos?.[0]
 
   return (
-    <Link href={`/imovel/${imovel.id}`} className="group block bg-white rounded-xl shadow-sm border border-slate-200 hover:shadow-md hover:border-slate-300 transition-all overflow-hidden">
+    <Link
+      href={`/imovel/${imovel.id}`}
+      className="group relative block bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:border-blue-200"
+    >
+      {/* Blue gradient glow on hover */}
+      <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+        style={{ background: 'linear-gradient(135deg, rgba(59,130,246,0.08) 0%, rgba(99,102,241,0.05) 100%)' }}
+      />
+      <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-blue-500 to-indigo-500 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left rounded-b-xl" />
+
       <div className="relative h-52 bg-slate-100 overflow-hidden">
         {mainPhoto ? (
           <Image
@@ -46,7 +55,7 @@ export default function ImovelCard({ imovel }: Props) {
         </div>
       </div>
 
-      <div className="p-4">
+      <div className="relative p-4">
         <p className="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-1">{imovel.tipo}</p>
         <h3 className="font-semibold text-slate-900 text-base leading-snug mb-1 line-clamp-2">{imovel.nome}</h3>
         <p className="text-sm text-slate-500 mb-3 line-clamp-1">{imovel.endereco_completo}</p>
@@ -85,6 +94,12 @@ export default function ImovelCard({ imovel }: Props) {
         </div>
 
         <PriceDisplay imovel={imovel} compact />
+
+        {imovel.condominio != null && (
+          <p className="text-xs text-slate-400 mt-2">
+            Cond.: <span className="font-medium text-slate-500">{formatCurrency(imovel.condominio)}/mês</span>
+          </p>
+        )}
       </div>
     </Link>
   )
