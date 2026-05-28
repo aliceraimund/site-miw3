@@ -74,10 +74,10 @@ export default async function HomePage({
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20">
           <p className="text-blue-400 text-sm font-semibold uppercase tracking-widest mb-3">Portfólio MIW3</p>
           <h1 className="text-4xl md:text-5xl font-bold text-white leading-tight max-w-2xl">
-            Imóveis Comerciais de Alto Padrão
+            Encontre o Imóvel Certo para o Seu Negócio
           </h1>
           <p className="mt-4 text-slate-400 text-lg max-w-xl leading-relaxed">
-            Galpões, salas, lojas e terrenos para venda e locação em São Paulo e região.
+            Apartamentos, galpões, salas, lojas e terrenos para venda e locação.
           </p>
           <div className="mt-8 flex flex-wrap gap-6 text-sm text-slate-400">
             <span className="flex items-center gap-2">
