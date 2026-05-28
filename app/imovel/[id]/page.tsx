@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { createServerClient } from '@/lib/supabase/server'
 import ImageGallery from '@/components/ImageGallery'
 import PriceDisplay from '@/components/PriceDisplay'
@@ -99,9 +100,14 @@ export default async function ImovelPage({ params }: { params: Promise<{ id: str
         </div>
 
         <div className="space-y-4">
-          <div className="bg-white rounded-xl border border-slate-200 p-5 sticky top-24">
-            <h2 className="font-semibold text-slate-900 mb-4 text-lg">Valores</h2>
-            <PriceDisplay imovel={i} />
+          <div className="bg-white rounded-xl border border-slate-200 p-5 sticky top-6 space-y-4">
+            <div>
+              <h2 className="font-semibold text-slate-900 mb-4 text-lg">Valores</h2>
+              <PriceDisplay imovel={i} />
+            </div>
+            <div className="bg-white rounded-xl border border-slate-200 p-5 flex items-center justify-center">
+              <Image src="/logo-miw3-preto.png" alt="MIW3" width={300} height={120} className="w-full h-auto" />
+            </div>
           </div>
         </div>
       </div>
