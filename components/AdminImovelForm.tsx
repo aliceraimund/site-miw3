@@ -32,6 +32,7 @@ const INITIAL: FormData = {
   descricao: null,
   destaque: false,
   valor_livre: false,
+  valor_livre_venda: false,
 }
 
 function Field({ label, children, required, hint }: { label: string; children: React.ReactNode; required?: boolean; hint?: string }) {
@@ -191,9 +192,24 @@ export default function AdminImovelForm({ imovel }: Props) {
         </Field>
 
         {(dp === 'venda' || dp === 'ambos') && (
-          <Field label="Preço de venda (R$)">
-            <input type="number" min="0" step="0.01" value={form.preco_venda ?? ''} onChange={(e) => set('preco_venda', numOrNull(e.target.value))} className={inputClass} placeholder="1500000" />
-          </Field>
+          <>
+            <Field label="Preço de venda (R$)">
+              <input type="number" min="0" step="0.01" value={form.preco_venda ?? ''} onChange={(e) => set('preco_venda', numOrNull(e.target.value))} className={inputClass} placeholder="1500000" />
+            </Field>
+            <Field label="Valor Livre? (Venda)">
+              <label className="flex items-center gap-3 mt-1 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={form.valor_livre_venda}
+                  onChange={(e) => set('valor_livre_venda', e.target.checked)}
+                  className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                />
+                <span className="text-sm text-slate-700">
+                  Exibir no anúncio: <span className="italic text-slate-500">"Valor livre ao proprietário — comissão de administração a acrescer"</span>
+                </span>
+              </label>
+            </Field>
+          </>
         )}
 
         {(dp === 'locacao' || dp === 'ambos') && (
@@ -201,7 +217,7 @@ export default function AdminImovelForm({ imovel }: Props) {
             <Field label="Preço de locação mensal (R$)">
               <input type="number" min="0" step="0.01" value={form.preco_locacao ?? ''} onChange={(e) => set('preco_locacao', numOrNull(e.target.value))} className={inputClass} placeholder="8000" />
             </Field>
-            <Field label="Valor Livre?">
+            <Field label="Valor Livre? (Locação)">
               <label className="flex items-center gap-3 mt-1 cursor-pointer">
                 <input
                   type="checkbox"
@@ -297,21 +313,37 @@ export default function AdminImovelForm({ imovel }: Props) {
             {fotos.map((url, i) => (
               <div key={url} className="relative group aspect-square rounded-lg overflow-hidden bg-slate-100">
                 <Image src={url} alt={`Foto ${i + 1}`} fill className="object-cover" sizes="120px" />
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center">
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors" />
+                {i === 0 ? (
+                  <span className="absolute bottom-1 left-1 bg-amber-500 text-white text-xs px-1.5 py-0.5 rounded font-medium flex items-center gap-1">
+                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                    Principal
+                  </span>
+                ) : (
                   <button
                     type="button"
-                    onClick={() => removePhoto(url)}
-                    className="opacity-0 group-hover:opacity-100 bg-red-600 text-white rounded-full p-1 transition-opacity"
-                    title="Remover foto"
+                    onClick={() => setFotos((prev) => [prev[i], ...prev.filter((_, j) => j !== i)])}
+                    className="opacity-0 group-hover:opacity-100 absolute bottom-1 left-1 bg-black/60 hover:bg-amber-500 text-white text-xs px-1.5 py-0.5 rounded transition-all flex items-center gap-1"
+                    title="Tornar principal"
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 20 20">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                     </svg>
+                    Principal
                   </button>
-                </div>
-                {i === 0 && (
-                  <span className="absolute bottom-1 left-1 bg-black/60 text-white text-xs px-1.5 py-0.5 rounded">principal</span>
                 )}
+                <button
+                  type="button"
+                  onClick={() => removePhoto(url)}
+                  className="opacity-0 group-hover:opacity-100 absolute top-1 right-1 bg-red-600 hover:bg-red-700 text-white rounded-full p-1 transition-opacity"
+                  title="Remover foto"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
               </div>
             ))}
           </div>

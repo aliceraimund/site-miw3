@@ -2,12 +2,18 @@ import { type Imovel } from '@/types/imovel'
 import { formatCurrency } from '@/lib/utils'
 
 interface Props {
-  imovel: Pick<Imovel, 'disponivel_para' | 'preco_venda' | 'preco_locacao' | 'iptu' | 'valor_livre'>
+  imovel: Pick<Imovel, 'disponivel_para' | 'preco_venda' | 'preco_locacao' | 'iptu' | 'valor_livre' | 'valor_livre_venda'>
   compact?: boolean
 }
 
+const ValorLivreNotice = () => (
+  <p className="text-xs text-slate-400 mt-1 italic">
+    Valor livre ao proprietário — comissão de administração a acrescer
+  </p>
+)
+
 export default function PriceDisplay({ imovel, compact = false }: Props) {
-  const { disponivel_para, preco_venda, preco_locacao, iptu, valor_livre } = imovel
+  const { disponivel_para, preco_venda, preco_locacao, iptu, valor_livre, valor_livre_venda } = imovel
 
   if (compact) {
     return (
@@ -34,7 +40,10 @@ export default function PriceDisplay({ imovel, compact = false }: Props) {
         <div className="bg-slate-50 rounded-lg p-4">
           <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Venda</p>
           {preco_venda ? (
-            <p className="text-2xl font-bold text-slate-900">{formatCurrency(preco_venda)}</p>
+            <>
+              <p className="text-2xl font-bold text-slate-900">{formatCurrency(preco_venda)}</p>
+              {valor_livre_venda && <ValorLivreNotice />}
+            </>
           ) : (
             <p className="text-slate-500 italic">Consultar</p>
           )}
@@ -50,11 +59,7 @@ export default function PriceDisplay({ imovel, compact = false }: Props) {
                 {formatCurrency(preco_locacao)}
                 <span className="text-base font-normal text-slate-500">/mês</span>
               </p>
-              {valor_livre && (
-                <p className="text-xs text-slate-400 mt-1 italic">
-                  Valor livre ao proprietário — comissão de administração a acrescer
-                </p>
-              )}
+              {valor_livre && <ValorLivreNotice />}
             </>
           ) : (
             <p className="text-slate-500 italic">Consultar</p>

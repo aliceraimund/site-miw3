@@ -22,5 +22,6 @@ export interface Imovel {
   descricao: string | null
   destaque: boolean
   valor_livre: boolean
+  valor_livre_venda: boolean
   criado_em: string
 }
