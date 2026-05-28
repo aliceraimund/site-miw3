@@ -18,7 +18,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <header className="bg-slate-900 shadow sticky top-0 z-40">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center">
             <a href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-              <Image src="/logo-miw3.svg" alt="MIW3" width={24} height={34} className="h-8 w-auto" />
+              <Image src="/logo-miw3.png" alt="MIW3" width={28} height={40} className="h-8 w-auto" />
               <span className="text-xl font-bold text-white tracking-tight">MIW3</span>
             </a>
             <span className="ml-3 text-slate-400 text-sm hidden sm:block">Imóveis Comerciais</span>
