@@ -4,7 +4,7 @@ import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
-import type { Imovel, DisponibilidadeEnum, StatusEnum } from '@/types/imovel'
+import type { Imovel, DisponibilidadeEnum, StatusEnum, CategoriaEnum } from '@/types/imovel'
 
 type FormData = Omit<Imovel, 'id' | 'criado_em'>
 
@@ -15,6 +15,7 @@ interface Props {
 const INITIAL: FormData = {
   nome: '',
   tipo: '',
+  categoria: 'comercial',
   endereco_completo: '',
   bairro: '',
   cidade: '',
@@ -22,6 +23,7 @@ const INITIAL: FormData = {
   preco_venda: null,
   preco_locacao: null,
   iptu: null,
+  condominio: null,
   area_m2: 0,
   quartos: null,
   suites: null,
@@ -33,7 +35,6 @@ const INITIAL: FormData = {
   destaque: false,
   valor_livre: false,
   valor_livre_venda: false,
-  condominio: null,
 }
 
 function Field({ label, children, required, hint }: { label: string; children: React.ReactNode; required?: boolean; hint?: string }) {
@@ -161,6 +162,14 @@ export default function AdminImovelForm({ imovel }: Props) {
 
           <Field label="Tipo" required hint="Ex: Galpão, Sala Comercial, Loja, Terreno">
             <input type="text" value={form.tipo} onChange={(e) => set('tipo', e.target.value)} required className={inputClass} placeholder="Galpão" />
+          </Field>
+
+          <Field label="Categoria" required>
+            <select value={form.categoria} onChange={(e) => set('categoria', e.target.value as CategoriaEnum)} className={inputClass}>
+              <option value="residencial">Residencial</option>
+              <option value="comercial">Comercial</option>
+              <option value="industrial">Industrial</option>
+            </select>
           </Field>
 
           <Field label="Endereço completo" required>
