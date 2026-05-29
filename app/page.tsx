@@ -3,15 +3,17 @@ import Image from 'next/image'
 import { createServerClient } from '@/lib/supabase/server'
 import ImovelCard from '@/components/ImovelCard'
 import WhatsAppFloat from '@/components/WhatsAppFloat'
-import type { Imovel, CategoriaEnum } from '@/types/imovel'
+import type { Imovel } from '@/types/imovel'
 
 interface SearchParams {
   categoria?: string
+  disponivel_para?: string
 }
 
-const CATEGORIAS: { key: CategoriaEnum; label: string; desc: string; icon: React.ReactNode }[] = [
+const CATEGORIAS = [
   {
-    key: 'residencial',
+    keys: ['residencial'],
+    tabKey: 'residencial',
     label: 'Residencial',
     desc: 'Apartamentos, casas e imóveis para investimento',
     icon: (
@@ -21,38 +23,54 @@ const CATEGORIAS: { key: CategoriaEnum; label: string; desc: string; icon: React
     ),
   },
   {
-    key: 'comercial',
-    label: 'Comercial',
-    desc: 'Salas, lojas e pontos comerciais',
+    keys: ['comercial', 'industrial'],
+    tabKey: 'comercial',
+    label: 'Comercial / Industrial',
+    desc: 'Salas, lojas, galpões, terrenos e áreas logísticas',
     icon: (
       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
       </svg>
     ),
   },
-  {
-    key: 'industrial',
-    label: 'Industrial',
-    desc: 'Galpões, áreas logísticas e terrenos industriais',
-    icon: (
-      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1M5 21h14a2 2 0 002-2v-5a2 2 0 00-2-2H5a2 2 0 00-2 2v5a2 2 0 002 2z" />
-      </svg>
-    ),
-  },
 ]
 
-async function CategoriaSection({ categoria, activeFilter }: { categoria: typeof CATEGORIAS[0]; activeFilter?: string }) {
+const DISPONIVEL_TABS = [
+  { key: '', label: 'Todos' },
+  { key: 'venda', label: 'Venda' },
+  { key: 'locacao', label: 'Locação' },
+  { key: 'ambos', label: 'Venda e Locação' },
+]
+
+function buildUrl(params: Record<string, string>) {
+  const filtered = Object.entries(params).filter(([, v]) => v !== '')
+  if (filtered.length === 0) return '/'
+  return '/?' + filtered.map(([k, v]) => `${k}=${v}`).join('&')
+}
+
+async function CategoriaSection({
+  categoria,
+  activeCat,
+  activeDisp,
+}: {
+  categoria: typeof CATEGORIAS[0]
+  activeCat: string
+  activeDisp: string
+}) {
+  if (activeCat && activeCat !== categoria.tabKey) return null
+
   const supabase = await createServerClient()
 
   let query = supabase
     .from('imoveis')
     .select('*')
-    .eq('categoria', categoria.key)
+    .in('categoria', categoria.keys)
     .order('destaque', { ascending: false })
     .order('criado_em', { ascending: false })
 
-  if (activeFilter && activeFilter !== categoria.key) return null
+  if (activeDisp) {
+    query = query.eq('disponivel_para', activeDisp)
+  }
 
   const { data: imoveis } = await query
 
@@ -87,7 +105,8 @@ export default async function HomePage({
   searchParams: Promise<SearchParams>
 }) {
   const sp = await searchParams
-  const activeFilter = sp.categoria
+  const activeCat = sp.categoria ?? ''
+  const activeDisp = sp.disponivel_para ?? ''
 
   return (
     <div>
@@ -118,34 +137,48 @@ export default async function HomePage({
         </div>
       </div>
 
-      {/* Category filter tabs */}
+      {/* Filter bar */}
       <div className="bg-white border-b border-slate-200 sticky top-0 z-30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex gap-1 overflow-x-auto py-3">
-            <a
-              href="/"
-              className={`shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${!activeFilter ? 'bg-blue-600 text-white' : 'text-slate-600 hover:bg-slate-100'}`}
-            >
+
+          {/* Row 1: Categoria */}
+          <div className="flex gap-1 overflow-x-auto pt-3 pb-2 border-b border-slate-100">
+            <a href={buildUrl({ disponivel_para: activeDisp })}
+              className={`shrink-0 px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${!activeCat ? 'bg-blue-600 text-white' : 'text-slate-600 hover:bg-slate-100'}`}>
               Todos
             </a>
             {CATEGORIAS.map((c) => (
-              <a
-                key={c.key}
-                href={`/?categoria=${c.key}`}
-                className={`shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeFilter === c.key ? 'bg-blue-600 text-white' : 'text-slate-600 hover:bg-slate-100'}`}
-              >
+              <a key={c.tabKey}
+                href={buildUrl({ categoria: c.tabKey, disponivel_para: activeDisp })}
+                className={`shrink-0 px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${activeCat === c.tabKey ? 'bg-blue-600 text-white' : 'text-slate-600 hover:bg-slate-100'}`}>
                 {c.label}
               </a>
             ))}
           </div>
+
+          {/* Row 2: Disponibilidade */}
+          <div className="flex gap-1 overflow-x-auto py-2">
+            {DISPONIVEL_TABS.map((t) => (
+              <a key={t.key}
+                href={buildUrl({ categoria: activeCat, disponivel_para: t.key })}
+                className={`shrink-0 px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${activeDisp === t.key ? 'bg-slate-800 text-white' : 'text-slate-500 hover:bg-slate-100'}`}>
+                {t.label}
+              </a>
+            ))}
+          </div>
+
         </div>
       </div>
 
-      {/* Listings by category */}
+      {/* Listings */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <Suspense fallback={<div className="space-y-10">{[1,2,3].map(i => <div key={i} className="h-80 bg-white rounded-xl animate-pulse" />)}</div>}>
+        <Suspense fallback={
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(6)].map((_, i) => <div key={i} className="bg-white rounded-xl h-80 animate-pulse shadow-sm" />)}
+          </div>
+        }>
           {CATEGORIAS.map((cat) => (
-            <CategoriaSection key={cat.key} categoria={cat} activeFilter={activeFilter} />
+            <CategoriaSection key={cat.tabKey} categoria={cat} activeCat={activeCat} activeDisp={activeDisp} />
           ))}
         </Suspense>
       </div>
