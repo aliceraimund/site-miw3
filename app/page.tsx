@@ -68,8 +68,12 @@ async function CategoriaSection({
     .order('destaque', { ascending: false })
     .order('criado_em', { ascending: false })
 
-  if (activeDisp) {
-    query = query.eq('disponivel_para', activeDisp)
+  if (activeDisp === 'venda') {
+    query = query.or('disponivel_para.eq.venda,disponivel_para.eq.ambos')
+  } else if (activeDisp === 'locacao') {
+    query = query.or('disponivel_para.eq.locacao,disponivel_para.eq.ambos')
+  } else if (activeDisp === 'ambos') {
+    query = query.eq('disponivel_para', 'ambos')
   }
 
   const { data: imoveis } = await query
