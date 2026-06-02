@@ -102,8 +102,8 @@ export default async function ImovelPage({ params }: { params: Promise<{ id: str
           )}
         </div>
 
-        <div className="space-y-4">
-          <div className="bg-white rounded-xl border border-slate-200 p-5 sticky top-6 space-y-4">
+        <div className="space-y-4 sticky top-6 self-start">
+          <div className="bg-white rounded-xl border border-slate-200 p-5 space-y-4">
             <div>
               <h2 className="font-semibold text-slate-900 mb-4 text-lg">Valores</h2>
               <PriceDisplay imovel={i} />
