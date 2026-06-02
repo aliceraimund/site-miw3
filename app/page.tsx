@@ -117,26 +117,46 @@ export default async function HomePage({
     <div>
       {/* Hero */}
       <div className="relative bg-slate-900 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-900/60 via-slate-900 to-slate-900" />
-        <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '32px 32px' }} />
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20 flex flex-col md:flex-row md:items-center md:justify-between gap-10">
+        {/* Background image slot — add /hero-bg.jpg to public/ to activate */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#0a1628] via-[#0d1f3c] to-[#071020]" />
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-900/95 via-slate-900/80 to-slate-900/40" />
+
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-24 flex flex-col md:flex-row md:items-center gap-12">
           <div className="flex-1">
-            <p className="text-blue-400 text-sm font-semibold uppercase tracking-widest mb-3">Portfólio MIW3</p>
-            <h1 className="text-4xl md:text-5xl font-bold text-white leading-tight">
-              Encontre o imóvel ideal
+            <p className="text-blue-400 text-xs font-bold uppercase tracking-[0.2em] mb-5">Portfólio MIW3</p>
+            <h1 className="text-5xl md:text-6xl font-bold text-white leading-[1.1]">
+              Encontre o<br />
+              <span className="text-blue-500">Imóvel Ideal</span>
             </h1>
-            <p className="mt-4 text-slate-400 text-lg leading-relaxed">
+            <div className="w-14 h-0.5 bg-blue-500 mt-5 mb-6" />
+            <p className="text-slate-400 text-lg leading-relaxed max-w-md">
               Apartamentos, galpões, salas, lojas e terrenos para venda e locação.
             </p>
-            <div className="mt-8 flex flex-wrap gap-6 text-sm text-slate-400">
-              <span className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-blue-500 inline-block" />Imóveis selecionados</span>
-              <span className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-blue-500 inline-block" />Atendimento personalizado</span>
-              <span className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-blue-500 inline-block" />Venda e locação</span>
+
+            {/* Category icon strip */}
+            <div className="mt-10 flex flex-wrap items-center gap-0">
+              {[
+                { label: 'Residencial', icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /> },
+                { label: 'Comercial', icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /> },
+                { label: 'Industrial', icon: <><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 21h14a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2z" /></> },
+                { label: 'Terrenos', icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0zM15 11a3 3 0 11-6 0 3 3 0 016 0z" /> },
+              ].map((cat, i, arr) => (
+                <div key={cat.label} className="flex items-center">
+                  <div className="flex items-center gap-2 px-4 py-2 text-slate-300 hover:text-blue-400 transition-colors cursor-default">
+                    <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      {cat.icon}
+                    </svg>
+                    <span className="text-sm font-medium">{cat.label}</span>
+                  </div>
+                  {i < arr.length - 1 && <span className="text-slate-700 text-lg select-none">|</span>}
+                </div>
+              ))}
             </div>
           </div>
-          <div className="flex-shrink-0 flex items-center justify-center">
+
+          <div className="flex-shrink-0 flex items-center justify-center md:justify-end">
             <a href="/">
-              <Image src="/logo-miw3.png" alt="MIW3" width={420} height={180} className="w-72 md:w-96 lg:w-[420px] h-auto" />
+              <Image src="/logo-miw3.png" alt="MIW3" width={420} height={180} className="w-64 md:w-80 lg:w-[380px] h-auto drop-shadow-2xl" />
             </a>
           </div>
         </div>
