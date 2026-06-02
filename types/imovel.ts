@@ -24,6 +24,7 @@ export interface Imovel {
   fotos: string[] | null
   descricao: string | null
   destaque: boolean
+  publicado: boolean
   valor_livre: boolean
   valor_livre_venda: boolean
   criado_em: string

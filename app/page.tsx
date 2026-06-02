@@ -64,6 +64,7 @@ async function CategoriaSection({
   let query = supabase
     .from('imoveis')
     .select('*')
+    .eq('publicado', true)
     .in('categoria', categoria.keys)
     .order('destaque', { ascending: false })
     .order('criado_em', { ascending: false })

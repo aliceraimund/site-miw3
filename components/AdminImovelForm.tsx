@@ -33,6 +33,7 @@ const INITIAL: FormData = {
   fotos: null,
   descricao: null,
   destaque: false,
+  publicado: true,
   valor_livre: false,
   valor_livre_venda: false,
 }
@@ -291,6 +292,20 @@ export default function AdminImovelForm({ imovel }: Props) {
                 className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
               />
               <span className="text-sm text-slate-700">Exibir como destaque na listagem</span>
+            </label>
+          </Field>
+
+          <Field label="Visibilidade">
+            <label className="flex items-center gap-3 mt-1 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={form.publicado}
+                onChange={(e) => set('publicado', e.target.checked)}
+                className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+              />
+              <span className="text-sm text-slate-700">
+                Publicar no site — desmarque para salvar sem exibir publicamente
+              </span>
             </label>
           </Field>
         </div>

@@ -20,7 +20,7 @@ export default async function ImovelPage({ params }: { params: Promise<{ id: str
     .eq('id', id)
     .single()
 
-  if (!imovel) notFound()
+  if (!imovel || !imovel.publicado) notFound()
 
   const i = imovel as Imovel
 
