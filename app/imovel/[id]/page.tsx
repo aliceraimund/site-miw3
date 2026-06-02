@@ -125,6 +125,34 @@ export default async function ImovelPage({ params }: { params: Promise<{ id: str
               <Image src="/logo-miw3-preto.png" alt="MIW3" width={300} height={120} className="w-full h-auto" />
             </div>
           </div>
+
+          {/* Map */}
+          <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+            <div className="px-4 pt-4 pb-2 flex items-center gap-2">
+              <svg className="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0zM15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              <p className="text-sm font-semibold text-slate-700">Localização</p>
+            </div>
+            <iframe
+              title="Mapa"
+              src={`https://maps.google.com/maps?q=${encodeURIComponent(`${i.endereco_completo}, ${i.bairro}, ${i.cidade}`)}&output=embed&z=15`}
+              className="w-full h-56 border-0"
+              loading="lazy"
+              allowFullScreen
+            />
+            <div className="px-4 py-3">
+              <p className="text-xs text-slate-500 leading-snug">{i.endereco_completo} — {i.bairro}, {i.cidade}</p>
+              <a
+                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${i.endereco_completo}, ${i.bairro}, ${i.cidade}`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-blue-600 hover:underline mt-1 inline-block"
+              >
+                Abrir no Google Maps →
+              </a>
+            </div>
+          </div>
         </div>
 
         <WhatsAppFloat message={`Olá, tudo bem? Tenho interesse no imóvel ${i.nome}!`} />
