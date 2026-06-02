@@ -117,9 +117,10 @@ export default async function HomePage({
     <div>
       {/* Hero */}
       <div className="relative bg-slate-900 overflow-hidden">
-        {/* Background image slot — add /hero-bg.jpg to public/ to activate */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#0a1628] via-[#0d1f3c] to-[#071020]" />
-        <div className="absolute inset-0 bg-gradient-to-r from-slate-900/95 via-slate-900/80 to-slate-900/40" />
+        <div className="absolute inset-0">
+          <Image src="/hero-bg.png" alt="" fill className="object-cover object-center" sizes="100vw" priority />
+        </div>
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-900/95 via-slate-900/80 to-slate-900/30" />
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-24 flex flex-col md:flex-row md:items-center gap-12">
           <div className="flex-1">
