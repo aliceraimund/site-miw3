@@ -123,7 +123,7 @@ export default async function HomePage({
           <div className="flex-1">
             <p className="text-blue-400 text-sm font-semibold uppercase tracking-widest mb-3">Portfólio MIW3</p>
             <h1 className="text-4xl md:text-5xl font-bold text-white leading-tight">
-              Encontre o imóvel ideal para você
+              Encontre o imóvel ideal
             </h1>
             <p className="mt-4 text-slate-400 text-lg leading-relaxed">
               Apartamentos, galpões, salas, lojas e terrenos para venda e locação.
