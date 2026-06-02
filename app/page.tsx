@@ -3,6 +3,7 @@ import Image from 'next/image'
 import { createServerClient } from '@/lib/supabase/server'
 import ImovelCard from '@/components/ImovelCard'
 import WhatsAppFloat from '@/components/WhatsAppFloat'
+import FilterTabs from '@/components/FilterTabs'
 import type { Imovel } from '@/types/imovel'
 
 interface SearchParams {
@@ -34,19 +35,6 @@ const CATEGORIAS = [
     ),
   },
 ]
-
-const DISPONIVEL_TABS = [
-  { key: '', label: 'Todos' },
-  { key: 'venda', label: 'Venda' },
-  { key: 'locacao', label: 'Locação' },
-  { key: 'ambos', label: 'Venda e Locação' },
-]
-
-function buildUrl(params: Record<string, string>) {
-  const filtered = Object.entries(params).filter(([, v]) => v !== '')
-  if (filtered.length === 0) return '/'
-  return '/?' + filtered.map(([k, v]) => `${k}=${v}`).join('&')
-}
 
 async function CategoriaSection({
   categoria,
@@ -164,37 +152,7 @@ export default async function HomePage({
       </div>
 
       {/* Filter bar */}
-      <div className="bg-white border-b border-slate-200 sticky top-0 z-30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-
-          {/* Row 1: Categoria */}
-          <div className="flex gap-1 overflow-x-auto pt-3 pb-2 border-b border-slate-100">
-            <a href={buildUrl({ disponivel_para: activeDisp })}
-              className={`shrink-0 px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${!activeCat ? 'bg-blue-600 text-white' : 'text-slate-600 hover:bg-slate-100'}`}>
-              Todos
-            </a>
-            {CATEGORIAS.map((c) => (
-              <a key={c.tabKey}
-                href={buildUrl({ categoria: c.tabKey, disponivel_para: activeDisp })}
-                className={`shrink-0 px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${activeCat === c.tabKey ? 'bg-blue-600 text-white' : 'text-slate-600 hover:bg-slate-100'}`}>
-                {c.label}
-              </a>
-            ))}
-          </div>
-
-          {/* Row 2: Disponibilidade */}
-          <div className="flex gap-1 overflow-x-auto py-2">
-            {DISPONIVEL_TABS.map((t) => (
-              <a key={t.key}
-                href={buildUrl({ categoria: activeCat, disponivel_para: t.key })}
-                className={`shrink-0 px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${activeDisp === t.key ? 'bg-slate-800 text-white' : 'text-slate-500 hover:bg-slate-100'}`}>
-                {t.label}
-              </a>
-            ))}
-          </div>
-
-        </div>
-      </div>
+      <FilterTabs activeCat={activeCat} activeDisp={activeDisp} />
 
       {/* Listings */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">

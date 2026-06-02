@@ -141,15 +141,18 @@ export default async function ImovelPage({ params }: { params: Promise<{ id: str
               loading="lazy"
               allowFullScreen
             />
-            <div className="px-4 py-3">
+            <div className="px-4 py-3 space-y-2">
               <p className="text-xs text-slate-500 leading-snug">{i.endereco_completo} — {i.bairro}, {i.cidade}</p>
               <a
                 href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${i.endereco_completo}, ${i.bairro}, ${i.cidade}`)}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-xs text-blue-600 hover:underline mt-1 inline-block"
+                className="flex items-center justify-center gap-2 w-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg py-2 transition-colors"
               >
-                Abrir no Google Maps →
+                <svg className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0zM15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                Abrir no Google Maps
               </a>
             </div>
           </div>
