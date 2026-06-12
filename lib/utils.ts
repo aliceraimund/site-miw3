@@ -14,12 +14,14 @@ export function formatArea(value: number): string {
 export const STATUS_LABELS: Record<string, string> = {
   disponivel: 'Disponível',
   em_reforma: 'Em reforma',
+  em_construcao: 'Em construção',
   reservado: 'Reservado',
 }
 
 export const STATUS_COLORS: Record<string, string> = {
   disponivel: 'bg-green-100 text-green-800',
   em_reforma: 'bg-yellow-100 text-yellow-800',
+  em_construcao: 'bg-orange-100 text-orange-800',
   reservado: 'bg-red-100 text-red-800',
 }
 

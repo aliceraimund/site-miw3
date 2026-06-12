@@ -1,5 +1,5 @@
 export type DisponibilidadeEnum = 'venda' | 'locacao' | 'ambos'
-export type StatusEnum = 'disponivel' | 'em_reforma' | 'reservado'
+export type StatusEnum = 'disponivel' | 'em_reforma' | 'em_construcao' | 'reservado'
 export type CategoriaEnum = 'residencial' | 'comercial' | 'industrial'
 
 export interface Imovel {

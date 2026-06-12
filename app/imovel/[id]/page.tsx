@@ -5,6 +5,7 @@ import { createServerClient } from '@/lib/supabase/server'
 import ImageGallery from '@/components/ImageGallery'
 import PriceDisplay from '@/components/PriceDisplay'
 import WhatsAppFloat from '@/components/WhatsAppFloat'
+import ShareButton from '@/components/ShareButton'
 import { formatArea, STATUS_LABELS, STATUS_COLORS, DISPONIVEL_LABELS, DISPONIVEL_COLORS } from '@/lib/utils'
 import type { Imovel } from '@/types/imovel'
 
@@ -26,12 +27,15 @@ export default async function ImovelPage({ params }: { params: Promise<{ id: str
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      <Link href="/" className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-slate-700 mb-6 transition-colors">
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-        </svg>
-        Voltar para listagem
-      </Link>
+      <div className="flex items-center justify-between mb-6">
+        <Link href="/" className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-slate-700 transition-colors">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          Voltar para listagem
+        </Link>
+        <ShareButton />
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-6">

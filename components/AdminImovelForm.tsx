@@ -279,6 +279,7 @@ export default function AdminImovelForm({ imovel }: Props) {
             <select value={form.status} onChange={(e) => set('status', e.target.value as StatusEnum)} className={inputClass}>
               <option value="disponivel">Disponível</option>
               <option value="em_reforma">Em reforma</option>
+              <option value="em_construcao">Em construção</option>
               <option value="reservado">Reservado</option>
             </select>
           </Field>
