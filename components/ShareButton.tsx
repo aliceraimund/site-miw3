@@ -15,7 +15,7 @@ export default function ShareButton() {
     <button
       onClick={handleCopy}
       title="Copiar link do imóvel"
-      className={`inline-flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-xl border-2 transition-all ${
+      className={`w-full flex items-center justify-center gap-2 text-sm font-semibold px-4 py-3 rounded-xl border-2 transition-all ${
         copied
           ? 'bg-green-50 border-green-400 text-green-700'
           : 'bg-blue-600 border-blue-600 text-white hover:bg-blue-700 hover:border-blue-700 shadow-md hover:shadow-lg'
