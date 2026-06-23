@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation'
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
 import { createServerClient } from '@/lib/supabase/server'
@@ -10,23 +11,87 @@ import { formatArea, STATUS_LABELS, STATUS_COLORS, DISPONIVEL_LABELS, DISPONIVEL
 import type { Imovel } from '@/types/imovel'
 
 const PHONE = '5511972793005'
+const SITE_URL = 'https://miw3.com.br'
+
+async function getImovel(id: string) {
+  const supabase = await createServerClient()
+  const { data } = await supabase.from('imoveis').select('*').eq('id', id).single()
+  return data as Imovel | null
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params
+  const imovel = await getImovel(id)
+
+  if (!imovel || !imovel.publicado) return {}
+
+  const i = imovel
+  const title = `${i.nome} — ${i.bairro}, ${i.cidade}`
+  const description = `${i.tipo} em ${i.bairro}, ${i.cidade}. ${formatArea(i.area_m2)}${i.quartos != null ? `, ${i.quartos} quartos` : ''}. ${DISPONIVEL_LABELS[i.disponivel_para]} com a MIW3.`
+  const image = i.fotos?.[0]
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: `/imovel/${i.id}`,
+    },
+    openGraph: {
+      title,
+      description,
+      url: `${SITE_URL}/imovel/${i.id}`,
+      type: 'website',
+      images: image ? [{ url: image }] : undefined,
+    },
+    twitter: {
+      card: image ? 'summary_large_image' : 'summary',
+      title,
+      description,
+      images: image ? [image] : undefined,
+    },
+  }
+}
 
 export default async function ImovelPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const supabase = await createServerClient()
-
-  const { data: imovel } = await supabase
-    .from('imoveis')
-    .select('*')
-    .eq('id', id)
-    .single()
+  const imovel = await getImovel(id)
 
   if (!imovel || !imovel.publicado) notFound()
 
-  const i = imovel as Imovel
+  const i = imovel
+
+  const price = i.valor_livre_venda || i.valor_livre ? undefined : i.preco_venda ?? i.preco_locacao ?? undefined
+
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'RealEstateListing',
+    name: i.nome,
+    description: i.descricao ?? undefined,
+    url: `${SITE_URL}/imovel/${i.id}`,
+    image: i.fotos ?? undefined,
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: i.endereco_completo,
+      addressLocality: i.cidade,
+      addressRegion: 'SP',
+      addressCountry: 'BR',
+    },
+    ...(price != null && {
+      offers: {
+        '@type': 'Offer',
+        price,
+        priceCurrency: 'BRL',
+        availability: i.status === 'disponivel' ? 'https://schema.org/InStock' : 'https://schema.org/PreOrder',
+      },
+    }),
+  }
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <Link href="/" className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-slate-700 mb-6 transition-colors">
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
