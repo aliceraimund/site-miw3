@@ -36,3 +36,48 @@ export const DISPONIVEL_COLORS: Record<string, string> = {
   locacao: 'bg-purple-100 text-purple-800',
   ambos: 'bg-indigo-100 text-indigo-800',
 }
+
+export const TIPO_IMOVEL_VISTORIA_LABELS: Record<string, string> = {
+  residencial: 'Residencial',
+  comercial: 'Comercial / Industrial',
+}
+
+export const TIPO_VISTORIA_LABELS: Record<string, string> = {
+  entrada: 'Entrada',
+  saida: 'Saída',
+}
+
+export const STATUS_VISTORIA_LABELS: Record<string, string> = {
+  rascunho: 'Rascunho',
+  concluida: 'Concluída',
+}
+
+export const STATUS_VISTORIA_COLORS: Record<string, string> = {
+  rascunho: 'bg-yellow-100 text-yellow-800',
+  concluida: 'bg-green-100 text-green-800',
+}
+
+export const ESTADO_LABELS: Record<string, string> = {
+  bom: 'Bom',
+  regular: 'Regular',
+  avaria: 'Avaria',
+  na: 'N/A',
+}
+
+export const ESTADO_COLORS: Record<string, string> = {
+  bom: 'bg-green-100 text-green-800',
+  regular: 'bg-amber-100 text-amber-800',
+  avaria: 'bg-red-100 text-red-800',
+  na: 'bg-slate-100 text-slate-600',
+}
+
+export const ESTADO_BUTTON_COLORS: Record<string, string> = {
+  bom: 'bg-green-600 border-green-600 text-white',
+  regular: 'bg-amber-500 border-amber-500 text-white',
+  avaria: 'bg-red-600 border-red-600 text-white',
+  na: 'bg-slate-500 border-slate-500 text-white',
+}
+
+export function formatDate(value: string): string {
+  return new Date(value + (value.length === 10 ? 'T00:00:00' : '')).toLocaleDateString('pt-BR')
+}
