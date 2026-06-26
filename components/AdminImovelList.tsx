@@ -17,6 +17,7 @@ export default function AdminImovelList({ imoveis: initialImoveis }: Props) {
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [confirmId, setConfirmId] = useState<string | null>(null)
   const [togglingId, setTogglingId] = useState<string | null>(null)
+  const [duplicatingId, setDuplicatingId] = useState<string | null>(null)
 
   const togglePublicado = async (id: string, current: boolean) => {
     setTogglingId(id)
@@ -26,6 +27,31 @@ export default function AdminImovelList({ imoveis: initialImoveis }: Props) {
       setImoveis((prev) => prev.map((i) => i.id === id ? { ...i, publicado: !current } : i))
     }
     setTogglingId(null)
+  }
+
+  const handleDuplicate = async (id: string) => {
+    setDuplicatingId(id)
+    const supabase = createClient()
+
+    const imovel = imoveis.find((i) => i.id === id)
+    if (!imovel) {
+      setDuplicatingId(null)
+      return
+    }
+
+    const { id: originalId, criado_em, ...rest } = imovel
+    void originalId; void criado_em
+
+    const { data, error } = await supabase
+      .from('imoveis')
+      .insert({ ...rest, nome: `${imovel.nome} (cópia)`, publicado: false })
+      .select('*')
+      .single()
+
+    setDuplicatingId(null)
+    if (!error && data) {
+      router.push(`/admin/imoveis/${data.id}/editar`)
+    }
   }
 
   const handleDelete = async (id: string) => {
@@ -125,6 +151,13 @@ export default function AdminImovelList({ imoveis: initialImoveis }: Props) {
             >
               Editar
             </Link>
+            <button
+              onClick={() => handleDuplicate(imovel.id)}
+              disabled={duplicatingId === imovel.id}
+              className="text-xs text-slate-600 hover:text-slate-800 border border-slate-200 rounded-lg px-3 py-1.5 hover:bg-slate-50 transition-colors disabled:opacity-50"
+            >
+              {duplicatingId === imovel.id ? 'Duplicando...' : 'Duplicar'}
+            </button>
             {confirmId === imovel.id ? (
               <div className="flex items-center gap-1">
                 <button

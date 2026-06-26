@@ -66,6 +66,8 @@ export default function AdminImovelForm({ imovel }: Props) {
     return rest
   })
   const [fotos, setFotos] = useState<string[]>(imovel?.fotos ?? [])
+  const [removedPaths, setRemovedPaths] = useState<string[]>([])
+  const [brokenUrls, setBrokenUrls] = useState<Set<string>>(new Set())
   const [uploading, setUploading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -108,12 +110,10 @@ export default function AdminImovelForm({ imovel }: Props) {
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
-  const removePhoto = async (url: string) => {
-    const supabase = createClient()
-    const parts = url.split('/imoveis/')
-    const path = parts[1]
+  const removePhoto = (url: string) => {
+    const path = url.split('/imoveis/')[1]
     if (path) {
-      await supabase.storage.from('imoveis').remove([path])
+      setRemovedPaths((prev) => [...prev, path])
     }
     setFotos((prev) => prev.filter((f) => f !== url))
   }
@@ -139,6 +139,10 @@ export default function AdminImovelForm({ imovel }: Props) {
       setError(err.message)
       setSaving(false)
       return
+    }
+
+    if (removedPaths.length > 0) {
+      await supabase.storage.from('imoveis').remove(removedPaths)
     }
 
     router.push('/admin')
@@ -342,7 +346,23 @@ export default function AdminImovelForm({ imovel }: Props) {
           <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
             {fotos.map((url, i) => (
               <div key={url} className="relative group aspect-square rounded-lg overflow-hidden bg-slate-100">
-                <Image src={url} alt={`Foto ${i + 1}`} fill className="object-cover" sizes="120px" />
+                {brokenUrls.has(url) ? (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 px-2 text-center text-slate-400">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                    </svg>
+                    <span className="text-[10px] leading-tight">Imagem indisponível — remova e reenvie</span>
+                  </div>
+                ) : (
+                  <Image
+                    src={url}
+                    alt={`Foto ${i + 1}`}
+                    fill
+                    className="object-cover"
+                    sizes="120px"
+                    onError={() => setBrokenUrls((prev) => new Set(prev).add(url))}
+                  />
+                )}
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors" />
                 {i === 0 ? (
                   <span className="absolute bottom-1 left-1 bg-amber-500 text-white text-xs px-1.5 py-0.5 rounded font-medium flex items-center gap-1">

@@ -56,7 +56,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               name: 'MIW3',
               url: SITE_URL,
               image: `${SITE_URL}/logo-miw3.png`,
-              telephone: '+5511972793005',
+              telephone: '+551135651505',
               email: 'contato.miw3@gmail.com',
               areaServed: 'BR',
             }),
