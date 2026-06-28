@@ -1,15 +1,23 @@
 'use client'
 
 import { useState } from 'react'
-import Image from 'next/image'
+import RetryImage from './RetryImage'
 
 interface Props {
   fotos: string[]
   nome: string
 }
 
-export default function ImageGallery({ fotos, nome }: Props) {
+export default function ImageGallery({ fotos: allFotos, nome }: Props) {
   const [activeIndex, setActiveIndex] = useState(0)
+  const [brokenUrls, setBrokenUrls] = useState<Set<string>>(new Set())
+
+  const fotos = allFotos.filter((f) => !brokenUrls.has(f))
+  const safeIndex = fotos.length > 0 ? activeIndex % fotos.length : 0
+
+  const markBroken = (url: string) => {
+    setBrokenUrls((prev) => (prev.has(url) ? prev : new Set(prev).add(url)))
+  }
 
   if (fotos.length === 0) {
     return (
@@ -27,13 +35,15 @@ export default function ImageGallery({ fotos, nome }: Props) {
   return (
     <div className="space-y-3">
       <div className="relative w-full h-80 md:h-[480px] rounded-xl overflow-hidden bg-slate-100">
-        <Image
-          src={fotos[activeIndex]}
-          alt={`${nome} - foto ${activeIndex + 1}`}
+        <RetryImage
+          src={fotos[safeIndex]}
+          alt={`${nome} - foto ${safeIndex + 1}`}
           fill
           className="object-cover"
           sizes="(max-width: 768px) 100vw, 800px"
-          priority
+          preload
+          maxRetries={2}
+          onGiveUp={() => markBroken(fotos[safeIndex])}
         />
         {fotos.length > 1 && (
           <>
@@ -56,7 +66,7 @@ export default function ImageGallery({ fotos, nome }: Props) {
               </svg>
             </button>
             <div className="absolute bottom-3 right-3 bg-black/50 text-white text-xs px-2 py-1 rounded-full">
-              {activeIndex + 1} / {fotos.length}
+              {safeIndex + 1} / {fotos.length}
             </div>
           </>
         )}
@@ -66,18 +76,20 @@ export default function ImageGallery({ fotos, nome }: Props) {
         <div className="flex gap-2 overflow-x-auto pb-1">
           {fotos.map((foto, i) => (
             <button
-              key={i}
+              key={foto}
               onClick={() => setActiveIndex(i)}
               className={`relative shrink-0 w-20 h-16 rounded-lg overflow-hidden border-2 transition-all ${
-                i === activeIndex ? 'border-blue-500' : 'border-transparent opacity-70 hover:opacity-100'
+                i === safeIndex ? 'border-blue-500' : 'border-transparent opacity-70 hover:opacity-100'
               }`}
             >
-              <Image
+              <RetryImage
                 src={foto}
                 alt={`${nome} - miniatura ${i + 1}`}
                 fill
                 className="object-cover"
                 sizes="80px"
+                maxRetries={2}
+                onGiveUp={() => markBroken(foto)}
               />
             </button>
           ))}

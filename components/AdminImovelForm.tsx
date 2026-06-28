@@ -2,11 +2,13 @@
 
 import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
+import RetryImage from '@/components/RetryImage'
 import type { Imovel, DisponibilidadeEnum, StatusEnum, CategoriaEnum } from '@/types/imovel'
 
 type FormData = Omit<Imovel, 'id' | 'criado_em'>
+
+const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp']
 
 interface Props {
   imovel?: Imovel
@@ -67,7 +69,6 @@ export default function AdminImovelForm({ imovel }: Props) {
   })
   const [fotos, setFotos] = useState<string[]>(imovel?.fotos ?? [])
   const [removedPaths, setRemovedPaths] = useState<string[]>([])
-  const [brokenUrls, setBrokenUrls] = useState<Set<string>>(new Set())
   const [uploading, setUploading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -87,6 +88,11 @@ export default function AdminImovelForm({ imovel }: Props) {
     for (let i = 0; i < files.length; i++) {
       const file = files[i]
       setUploadProgress(`Enviando ${i + 1}/${files.length}...`)
+
+      if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
+        setError(`"${file.name}" está em um formato não suportado pelo site (${file.type || 'desconhecido'}). Fotos tiradas em iPhone às vezes salvam em HEIC — abra a foto, use "Compartilhar" e exporte/salve como JPEG antes de enviar aqui.`)
+        continue
+      }
 
       const ext = file.name.split('.').pop()?.toLowerCase() ?? 'jpg'
       const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
@@ -327,7 +333,7 @@ export default function AdminImovelForm({ imovel }: Props) {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
           <p className="text-sm text-slate-600 font-medium">Clique para selecionar fotos</p>
-          <p className="text-xs text-slate-400 mt-1">PNG, JPEG — múltiplos arquivos permitidos</p>
+          <p className="text-xs text-slate-400 mt-1">PNG, JPEG ou WebP — múltiplos arquivos permitidos. Fotos em HEIC (iPhone) não são suportadas.</p>
           {uploading && (
             <p className="text-xs text-blue-600 mt-2 font-medium">{uploadProgress}</p>
           )}
@@ -336,7 +342,7 @@ export default function AdminImovelForm({ imovel }: Props) {
         <input
           ref={fileInputRef}
           type="file"
-          accept="image/jpeg,image/png,image/jpg,image/webp"
+          accept="image/jpeg,image/png,image/webp"
           multiple
           className="hidden"
           onChange={(e) => e.target.files && handleImageUpload(e.target.files)}
@@ -346,23 +352,21 @@ export default function AdminImovelForm({ imovel }: Props) {
           <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
             {fotos.map((url, i) => (
               <div key={url} className="relative group aspect-square rounded-lg overflow-hidden bg-slate-100">
-                {brokenUrls.has(url) ? (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 px-2 text-center text-slate-400">
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
-                    </svg>
-                    <span className="text-[10px] leading-tight">Imagem indisponível — remova e reenvie</span>
-                  </div>
-                ) : (
-                  <Image
-                    src={url}
-                    alt={`Foto ${i + 1}`}
-                    fill
-                    className="object-cover"
-                    sizes="120px"
-                    onError={() => setBrokenUrls((prev) => new Set(prev).add(url))}
-                  />
-                )}
+                <RetryImage
+                  src={url}
+                  alt={`Foto ${i + 1}`}
+                  fill
+                  className="object-cover"
+                  sizes="120px"
+                  fallback={
+                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 px-2 text-center text-slate-400">
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                      </svg>
+                      <span className="text-[10px] leading-tight">Imagem indisponível — remova e reenvie</span>
+                    </div>
+                  }
+                />
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors" />
                 {i === 0 ? (
                   <span className="absolute bottom-1 left-1 bg-amber-500 text-white text-xs px-1.5 py-0.5 rounded font-medium flex items-center gap-1">
