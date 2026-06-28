@@ -134,25 +134,25 @@ export default async function ImovelPage({ params }: { params: Promise<{ id: str
               <p className="text-xs text-slate-500 mb-1">Área</p>
               <p className="font-bold text-slate-900">{formatArea(i.area_m2)}</p>
             </div>
-            {i.quartos != null && (
+            {!!i.quartos && (
               <div className="bg-white rounded-xl p-4 border border-slate-200 text-center">
                 <p className="text-xs text-slate-500 mb-1">Quartos</p>
                 <p className="font-bold text-slate-900">{i.quartos}</p>
               </div>
             )}
-            {i.suites != null && (
+            {!!i.suites && (
               <div className="bg-white rounded-xl p-4 border border-slate-200 text-center">
                 <p className="text-xs text-slate-500 mb-1">Suítes</p>
                 <p className="font-bold text-slate-900">{i.suites}</p>
               </div>
             )}
-            {i.banheiros != null && (
+            {!!i.banheiros && (
               <div className="bg-white rounded-xl p-4 border border-slate-200 text-center">
                 <p className="text-xs text-slate-500 mb-1">Banheiros</p>
                 <p className="font-bold text-slate-900">{i.banheiros}</p>
               </div>
             )}
-            {i.vagas != null && (
+            {!!i.vagas && (
               <div className="bg-white rounded-xl p-4 border border-slate-200 text-center">
                 <p className="text-xs text-slate-500 mb-1">Vagas</p>
                 <p className="font-bold text-slate-900">{i.vagas}</p>
