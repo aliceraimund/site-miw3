@@ -69,6 +69,8 @@ export default function AdminImovelForm({ imovel }: Props) {
   })
   const [fotos, setFotos] = useState<string[]>(imovel?.fotos ?? [])
   const [removedPaths, setRemovedPaths] = useState<string[]>([])
+  const [dragIndex, setDragIndex] = useState<number | null>(null)
+  const [overIndex, setOverIndex] = useState<number | null>(null)
   const [uploading, setUploading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -122,6 +124,15 @@ export default function AdminImovelForm({ imovel }: Props) {
       setRemovedPaths((prev) => [...prev, path])
     }
     setFotos((prev) => prev.filter((f) => f !== url))
+  }
+
+  const reorderPhoto = (from: number, to: number) => {
+    setFotos((prev) => {
+      const next = [...prev]
+      const [moved] = next.splice(from, 1)
+      next.splice(to, 0, moved)
+      return next
+    })
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -351,11 +362,33 @@ export default function AdminImovelForm({ imovel }: Props) {
         {fotos.length > 0 && (
           <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
             {fotos.map((url, i) => (
-              <div key={url} className="relative group aspect-square rounded-lg overflow-hidden bg-slate-100">
+              <div
+                key={url}
+                draggable
+                onDragStart={() => setDragIndex(i)}
+                onDragOver={(e) => {
+                  e.preventDefault()
+                  if (overIndex !== i) setOverIndex(i)
+                }}
+                onDrop={(e) => {
+                  e.preventDefault()
+                  if (dragIndex !== null && dragIndex !== i) reorderPhoto(dragIndex, i)
+                  setDragIndex(null)
+                  setOverIndex(null)
+                }}
+                onDragEnd={() => {
+                  setDragIndex(null)
+                  setOverIndex(null)
+                }}
+                className={`relative group aspect-square rounded-lg overflow-hidden bg-slate-100 cursor-grab active:cursor-grabbing transition-opacity ${
+                  dragIndex === i ? 'opacity-40' : ''
+                } ${overIndex === i && dragIndex !== null && dragIndex !== i ? 'ring-2 ring-blue-500 ring-offset-2' : ''}`}
+              >
                 <RetryImage
                   src={url}
                   alt={`Foto ${i + 1}`}
                   fill
+                  draggable={false}
                   className="object-cover"
                   sizes="120px"
                   fallback={
