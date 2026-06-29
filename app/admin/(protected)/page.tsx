@@ -12,7 +12,7 @@ export default async function AdminPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col items-start gap-4 mb-6 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Imóveis</h1>
           <p className="text-slate-500 text-sm mt-0.5">{imoveis?.length ?? 0} imóveis cadastrados</p>

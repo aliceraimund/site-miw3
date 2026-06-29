@@ -27,12 +27,12 @@ export default async function VistoriasPage({ searchParams }: Props) {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col items-start gap-4 mb-6 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Vistorias</h1>
           <p className="text-slate-500 text-sm mt-0.5">{vistorias?.length ?? 0} vistorias encontradas</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Link
             href="/admin/vistorias/modelo-branco"
             className="text-sm text-slate-600 border border-slate-300 px-4 py-2 rounded-lg hover:bg-slate-50 transition-colors"
