@@ -143,7 +143,7 @@ export default async function HomePage({
             </div>
           </div>
 
-          <div className="flex-shrink-0 flex items-center justify-center md:justify-end">
+          <div className="flex-shrink-0 flex items-center justify-start md:justify-end">
             <a href="/">
               <Image src="/logo-miw3.png" alt="MIW3" width={420} height={180} className="w-64 md:w-80 lg:w-[380px] h-auto drop-shadow-2xl" />
             </a>
