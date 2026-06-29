@@ -30,7 +30,7 @@ export async function GET(request: Request, { params }: Params) {
 
   const itens = ((templates ?? []) as ChecklistTemplateItem[]).map((t) => ({ secao: t.secao, item: t.item }))
 
-  const logoUrl = new URL('/logo-miw3.png', request.url).toString()
+  const logoUrl = new URL('/logo-miw3-preto.png', request.url).toString()
 
   const buffer = await renderToBuffer(
     <ModeloBrancoDocument tipoImovel={tipo as TipoImovelVistoria} itens={itens} logoUrl={logoUrl} />

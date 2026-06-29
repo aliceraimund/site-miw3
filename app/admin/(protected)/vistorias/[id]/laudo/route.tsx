@@ -53,7 +53,7 @@ export async function GET(request: Request, { params }: Params) {
     })
   )
 
-  const logoUrl = new URL('/logo-miw3.png', request.url).toString()
+  const logoUrl = new URL('/logo-miw3-preto.png', request.url).toString()
 
   const buffer = await renderToBuffer(
     <LaudoDocument vistoria={vistoria as Vistoria} itens={itensPdf} logoUrl={logoUrl} />
