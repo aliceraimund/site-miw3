@@ -413,7 +413,7 @@ export default function AdminImovelForm({ imovel }: Props) {
                   <button
                     type="button"
                     onClick={() => setFotos((prev) => [prev[i], ...prev.filter((_, j) => j !== i)])}
-                    className="opacity-0 group-hover:opacity-100 absolute bottom-1 left-1 bg-black/60 hover:bg-amber-500 text-white text-xs px-1.5 py-0.5 rounded transition-all flex items-center gap-1"
+                    className="absolute bottom-1 left-1 sm:opacity-0 sm:group-hover:opacity-100 bg-black/60 hover:bg-amber-500 text-white text-xs px-1.5 py-0.5 rounded transition-all flex items-center gap-1"
                     title="Tornar principal"
                   >
                     <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 20 20">
@@ -425,13 +425,41 @@ export default function AdminImovelForm({ imovel }: Props) {
                 <button
                   type="button"
                   onClick={() => removePhoto(url)}
-                  className="opacity-0 group-hover:opacity-100 absolute top-1 right-1 bg-red-600 hover:bg-red-700 text-white rounded-full p-1 transition-opacity"
+                  className="absolute top-1 right-1 sm:opacity-0 sm:group-hover:opacity-100 bg-red-600 hover:bg-red-700 text-white rounded-full p-1 transition-opacity"
                   title="Remover foto"
                 >
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
+                {fotos.length > 1 && (
+                  <div className="sm:hidden absolute bottom-1 right-1 flex gap-0.5">
+                    {i > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => reorderPhoto(i, i - 1)}
+                        className="bg-black/60 text-white rounded p-1"
+                        title="Mover para esquerda"
+                      >
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                        </svg>
+                      </button>
+                    )}
+                    {i < fotos.length - 1 && (
+                      <button
+                        type="button"
+                        onClick={() => reorderPhoto(i, i + 1)}
+                        className="bg-black/60 text-white rounded p-1"
+                        title="Mover para direita"
+                      >
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
             ))}
           </div>
