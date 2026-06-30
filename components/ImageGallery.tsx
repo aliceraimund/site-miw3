@@ -57,6 +57,7 @@ export default function ImageGallery({ fotos, nome }: Props) {
             src={fotos[safeIndex]}
             alt={`${nome} - foto ${safeIndex + 1}`}
             fill
+            unoptimized
             className="object-cover"
             sizes="(max-width: 768px) 100vw, 800px"
             preload
@@ -123,6 +124,7 @@ export default function ImageGallery({ fotos, nome }: Props) {
                 src={foto}
                 alt={`${nome} - miniatura ${i + 1}`}
                 fill
+                unoptimized
                 className="object-cover"
                 sizes="80px"
                 maxRetries={2}
@@ -159,6 +161,7 @@ export default function ImageGallery({ fotos, nome }: Props) {
               src={fotos[safeIndex]}
               alt={`${nome} - foto ${safeIndex + 1} em tamanho original`}
               fill
+              unoptimized
               className="object-contain"
               sizes="92vw"
               maxRetries={2}
