@@ -138,19 +138,6 @@ export default function AdminImovelForm({ imovel }: Props) {
       }
 
       const { data: { publicUrl } } = supabase.storage.from('imoveis').getPublicUrl(data.path)
-
-      setUploadProgress(`Verificando ${i + 1}/${files.length}...`)
-      try {
-        const check = await fetch(publicUrl, { method: 'HEAD' })
-        if (!check.ok) {
-          await supabase.storage.from('imoveis').remove([data.path])
-          setError(`Imagem "${file.name}" foi enviada mas o servidor não conseguiu processá-la. Tente novamente em alguns segundos.`)
-          continue
-        }
-      } catch {
-        // erro de rede na verificação — adiciona mesmo assim, RetryImage lida com a falha
-      }
-
       newUrls.push(publicUrl)
     }
 
