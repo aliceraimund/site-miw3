@@ -388,6 +388,7 @@ export default function AdminImovelForm({ imovel }: Props) {
                   src={url}
                   alt={`Foto ${i + 1}`}
                   fill
+                  unoptimized
                   draggable={false}
                   className="object-cover"
                   sizes="120px"
