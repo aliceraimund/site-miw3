@@ -10,29 +10,6 @@ type FormData = Omit<Imovel, 'id' | 'criado_em'>
 
 const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp']
 
-function normalizeToJpeg(file: File): Promise<Blob> {
-  return new Promise((resolve, reject) => {
-    const img = new window.Image()
-    const objectUrl = URL.createObjectURL(file)
-    img.onload = () => {
-      URL.revokeObjectURL(objectUrl)
-      const canvas = document.createElement('canvas')
-      canvas.width = img.naturalWidth
-      canvas.height = img.naturalHeight
-      const ctx = canvas.getContext('2d')
-      if (!ctx) { reject(new Error('canvas indisponível')); return }
-      ctx.drawImage(img, 0, 0)
-      canvas.toBlob(
-        (blob) => { blob ? resolve(blob) : reject(new Error('conversão falhou')) },
-        'image/jpeg',
-        0.88
-      )
-    }
-    img.onerror = () => { URL.revokeObjectURL(objectUrl); reject(new Error('leitura da imagem falhou')) }
-    img.src = objectUrl
-  })
-}
-
 interface Props {
   imovel?: Imovel
 }
@@ -119,18 +96,12 @@ export default function AdminImovelForm({ imovel }: Props) {
         continue
       }
 
-      let uploadBlob: Blob = file
-      try {
-        uploadBlob = await normalizeToJpeg(file)
-      } catch {
-        // fallback: envia o arquivo original se a conversão falhar
-      }
-
-      const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.jpg`
+      const ext = file.name.split('.').pop()?.toLowerCase() ?? 'jpg'
+      const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
 
       const { data, error: uploadError } = await supabase.storage
         .from('imoveis')
-        .upload(path, uploadBlob, { cacheControl: '3600', upsert: false, contentType: 'image/jpeg' })
+        .upload(path, file, { cacheControl: '3600', upsert: false })
 
       if (uploadError) {
         setError(`Erro ao enviar ${file.name}: ${uploadError.message}`)
