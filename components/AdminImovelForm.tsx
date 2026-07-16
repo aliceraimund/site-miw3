@@ -38,6 +38,7 @@ const INITIAL: FormData = {
   publicado: true,
   valor_livre: false,
   valor_livre_venda: false,
+  whatsapp: null,
 }
 
 function Field({ label, children, required, hint }: { label: string; children: React.ReactNode; required?: boolean; hint?: string }) {
@@ -339,6 +340,16 @@ export default function AdminImovelForm({ imovel }: Props) {
                 Publicar no site — desmarque para salvar sem exibir publicamente
               </span>
             </label>
+          </Field>
+
+          <Field label="WhatsApp do responsável" hint='Somente números, com DDI e DDD (ex: 5511972793005). Vazio usa o padrão da MIW3.'>
+            <input
+              type="tel"
+              value={form.whatsapp ?? ''}
+              onChange={(e) => set('whatsapp', e.target.value.replace(/\D/g, '') || null)}
+              placeholder="5511972793005"
+              className={inputClass}
+            />
           </Field>
         </div>
       </div>

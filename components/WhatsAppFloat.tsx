@@ -2,12 +2,13 @@
 
 interface Props {
   message: string
+  phone?: string
 }
 
 const PHONE = '5511972793005'
 
-export default function WhatsAppFloat({ message }: Props) {
-  const url = `https://wa.me/${PHONE}?text=${encodeURIComponent(message)}`
+export default function WhatsAppFloat({ message, phone = PHONE }: Props) {
+  const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`
   return (
     <a
       href={url}

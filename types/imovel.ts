@@ -27,5 +27,6 @@ export interface Imovel {
   publicado: boolean
   valor_livre: boolean
   valor_livre_venda: boolean
+  whatsapp: string | null
   criado_em: string
 }

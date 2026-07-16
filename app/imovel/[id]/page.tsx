@@ -59,6 +59,7 @@ export default async function ImovelPage({ params }: { params: Promise<{ id: str
   if (!imovel || !imovel.publicado) notFound()
 
   const i = imovel
+  const phone = i.whatsapp || PHONE
 
   const price = i.valor_livre_venda || i.valor_livre ? undefined : i.preco_venda ?? i.preco_locacao ?? undefined
 
@@ -177,7 +178,7 @@ export default async function ImovelPage({ params }: { params: Promise<{ id: str
             </div>
 
             <a
-              href={`https://wa.me/${PHONE}?text=${encodeURIComponent(`Olá, tudo bem? Tenho interesse no imóvel ${i.nome}!`)}`}
+              href={`https://wa.me/${phone}?text=${encodeURIComponent(`Olá, tudo bem? Tenho interesse no imóvel ${i.nome}!`)}`}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center justify-center gap-2 w-full bg-green-500 hover:bg-green-600 text-white font-semibold rounded-xl py-3 transition-colors"
@@ -225,7 +226,7 @@ export default async function ImovelPage({ params }: { params: Promise<{ id: str
           </div>
         </div>
 
-        <WhatsAppFloat message={`Olá, tudo bem? Tenho interesse no imóvel ${i.nome}!`} />
+        <WhatsAppFloat phone={phone} message={`Olá, tudo bem? Tenho interesse no imóvel ${i.nome}!`} />
       </div>
     </div>
   )
