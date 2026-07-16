@@ -42,9 +42,26 @@ export default function AdminImovelList({ imoveis: initialImoveis }: Props) {
     const { id: originalId, criado_em, ...rest } = imovel
     void originalId; void criado_em
 
+    // Copia fisicamente cada foto no storage para que a cópia tenha arquivos
+    // próprios — sem isso, excluir/editar um anúncio apagaria fotos do outro.
+    const newFotos: string[] = []
+    for (const url of imovel.fotos ?? []) {
+      const srcPath = url.split('/imoveis/')[1]
+      if (!srcPath) continue
+      const ext = srcPath.split('.').pop() ?? 'jpg'
+      const destPath = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+      const { error: copyError } = await supabase.storage.from('imoveis').copy(srcPath, destPath)
+      if (copyError) {
+        newFotos.push(url)
+      } else {
+        const { data: { publicUrl } } = supabase.storage.from('imoveis').getPublicUrl(destPath)
+        newFotos.push(publicUrl)
+      }
+    }
+
     const { data, error } = await supabase
       .from('imoveis')
-      .insert({ ...rest, nome: `${imovel.nome} (cópia)`, publicado: false })
+      .insert({ ...rest, fotos: newFotos.length > 0 ? newFotos : null, nome: `${imovel.nome} (cópia)`, publicado: false })
       .select('*')
       .single()
 
@@ -60,10 +77,18 @@ export default function AdminImovelList({ imoveis: initialImoveis }: Props) {
 
     const imovel = imoveis.find((i) => i.id === id)
     if (imovel?.fotos?.length) {
-      const paths = imovel.fotos.map((url) => {
-        const parts = url.split('/imoveis/')
-        return parts[1] ?? ''
-      }).filter(Boolean)
+      // Só remove do storage arquivos que nenhum outro anúncio referencia
+      // (anúncios duplicados antigos podem compartilhar as mesmas fotos).
+      const { data: others } = await supabase
+        .from('imoveis')
+        .select('fotos')
+        .neq('id', id)
+        .overlaps('fotos', imovel.fotos)
+      const stillUsed = new Set((others ?? []).flatMap((o) => o.fotos ?? []))
+      const paths = imovel.fotos
+        .filter((url) => !stillUsed.has(url))
+        .map((url) => url.split('/imoveis/')[1] ?? '')
+        .filter(Boolean)
       if (paths.length) {
         await supabase.storage.from('imoveis').remove(paths)
       }

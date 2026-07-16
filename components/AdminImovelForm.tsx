@@ -68,7 +68,7 @@ export default function AdminImovelForm({ imovel }: Props) {
     return rest
   })
   const [fotos, setFotos] = useState<string[]>(imovel?.fotos ?? [])
-  const [removedPaths, setRemovedPaths] = useState<string[]>([])
+  const [removedUrls, setRemovedUrls] = useState<string[]>([])
   const [dragIndex, setDragIndex] = useState<number | null>(null)
   const [overIndex, setOverIndex] = useState<number | null>(null)
   const [uploading, setUploading] = useState(false)
@@ -119,10 +119,7 @@ export default function AdminImovelForm({ imovel }: Props) {
   }
 
   const removePhoto = (url: string) => {
-    const path = url.split('/imoveis/')[1]
-    if (path) {
-      setRemovedPaths((prev) => [...prev, path])
-    }
+    setRemovedUrls((prev) => [...prev, url])
     setFotos((prev) => prev.filter((f) => f !== url))
   }
 
@@ -158,8 +155,21 @@ export default function AdminImovelForm({ imovel }: Props) {
       return
     }
 
-    if (removedPaths.length > 0) {
-      await supabase.storage.from('imoveis').remove(removedPaths)
+    if (removedUrls.length > 0) {
+      // Só remove do storage arquivos que nenhum outro anúncio referencia
+      // (anúncios duplicados antigos podem compartilhar as mesmas fotos).
+      const { data: others } = await supabase
+        .from('imoveis')
+        .select('fotos')
+        .overlaps('fotos', removedUrls)
+      const stillUsed = new Set((others ?? []).flatMap((o) => o.fotos ?? []))
+      const paths = removedUrls
+        .filter((url) => !stillUsed.has(url))
+        .map((url) => url.split('/imoveis/')[1] ?? '')
+        .filter(Boolean)
+      if (paths.length > 0) {
+        await supabase.storage.from('imoveis').remove(paths)
+      }
     }
 
     router.push('/admin')
