@@ -9,6 +9,15 @@ import type { Imovel } from '@/types/imovel'
 interface SearchParams {
   categoria?: string
   disponivel_para?: string
+  cidade?: string
+  q?: string
+}
+
+async function getCidades(): Promise<string[]> {
+  const supabase = await createServerClient()
+  const { data } = await supabase.from('imoveis').select('cidade').eq('publicado', true)
+  const unicas = new Set((data ?? []).map((r) => r.cidade).filter(Boolean) as string[])
+  return [...unicas].sort((a, b) => a.localeCompare(b, 'pt-BR'))
 }
 
 const CATEGORIAS = [
@@ -39,9 +48,13 @@ const CATEGORIAS = [
 async function Listings({
   activeCat,
   activeDisp,
+  activeCidade,
+  activeQ,
 }: {
   activeCat: string
   activeDisp: string
+  activeCidade: string
+  activeQ: string
 }) {
   const categoria = CATEGORIAS.find((c) => c.tabKey === activeCat)
 
@@ -59,6 +72,19 @@ async function Listings({
     query = query.in('categoria', categoria.keys)
   }
 
+  if (activeCidade) {
+    query = query.eq('cidade', activeCidade)
+  }
+
+  // Busca por texto em nome, cidade, bairro, tipo e endereço.
+  const termo = activeQ.replace(/[,()%*\\]/g, ' ').trim()
+  if (termo) {
+    const like = `%${termo}%`
+    query = query.or(
+      `nome.ilike.${like},cidade.ilike.${like},bairro.ilike.${like},tipo.ilike.${like},endereco_completo.ilike.${like}`
+    )
+  }
+
   if (activeDisp === 'venda') {
     query = query.or('disponivel_para.eq.venda,disponivel_para.eq.ambos')
   } else if (activeDisp === 'locacao') {
@@ -72,7 +98,11 @@ async function Listings({
   if (!imoveis || imoveis.length === 0) {
     return (
       <div className="bg-white rounded-xl border border-slate-200 p-12 text-center">
-        <p className="text-slate-500">Nenhum imóvel encontrado para este filtro.</p>
+        <p className="text-slate-500">
+          {activeQ || activeCidade
+            ? 'Nenhum imóvel encontrado para esta busca. Tente outros termos ou remova os filtros.'
+            : 'Nenhum imóvel encontrado para este filtro.'}
+        </p>
       </div>
     )
   }
@@ -88,7 +118,9 @@ async function Listings({
           )}
         </div>
         <div>
-          <h2 className="text-xl font-bold text-slate-900">{categoria ? categoria.label : 'Todos os imóveis'}</h2>
+          <h2 className="text-xl font-bold text-slate-900">
+            {activeQ ? `Resultados para "${activeQ}"` : activeCidade ? `Imóveis em ${activeCidade}` : categoria ? categoria.label : 'Todos os imóveis'}
+          </h2>
           <p className="text-sm text-slate-500">{categoria ? categoria.desc : 'Residenciais, comerciais e industriais para venda e locação'}</p>
         </div>
         <span className="ml-auto text-xs font-semibold text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full">
@@ -112,6 +144,9 @@ export default async function HomePage({
   const sp = await searchParams
   const activeCat = sp.categoria ?? ''
   const activeDisp = sp.disponivel_para ?? ''
+  const activeCidade = sp.cidade ?? ''
+  const activeQ = sp.q ?? ''
+  const cidades = await getCidades()
 
   return (
     <div>
@@ -164,16 +199,19 @@ export default async function HomePage({
       </div>
 
       {/* Filter bar */}
-      <FilterTabs activeCat={activeCat} activeDisp={activeDisp} />
+      <FilterTabs activeCat={activeCat} activeDisp={activeDisp} activeCidade={activeCidade} activeQ={activeQ} cidades={cidades} />
 
       {/* Listings */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <Suspense fallback={
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(6)].map((_, i) => <div key={i} className="bg-white rounded-xl h-80 animate-pulse shadow-sm" />)}
-          </div>
-        }>
-          <Listings activeCat={activeCat} activeDisp={activeDisp} />
+        <Suspense
+          key={`${activeCat}|${activeDisp}|${activeCidade}|${activeQ}`}
+          fallback={
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[...Array(6)].map((_, i) => <div key={i} className="bg-white rounded-xl h-80 animate-pulse shadow-sm" />)}
+            </div>
+          }
+        >
+          <Listings activeCat={activeCat} activeDisp={activeDisp} activeCidade={activeCidade} activeQ={activeQ} />
         </Suspense>
       </div>
 
