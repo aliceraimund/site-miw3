@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { createServerClient } from '@/lib/supabase/server'
 import AdminGestaoList from '@/components/AdminGestaoList'
+import GestaoSubNav from '@/components/GestaoSubNav'
 import type { Imovel } from '@/types/imovel'
 import type { ImovelGestao } from '@/types/gestao'
 
@@ -28,6 +29,7 @@ export default async function GestaoPage() {
 
   return (
     <div>
+      <GestaoSubNav />
       <div className="flex flex-col items-start gap-4 mb-6 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Gestão de imóveis</h1>
