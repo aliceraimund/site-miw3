@@ -2,8 +2,10 @@
 
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 import { formatCurrency, formatDate } from '@/lib/utils'
-import { type Manutencao, MANUTENCAO_STATUS_LABELS, MANUTENCAO_STATUS_COLORS, type ManutencaoStatus } from '@/types/manutencao'
+import { type Manutencao, type ManutencaoStatus, MANUTENCAO_STATUS_LABELS } from '@/types/manutencao'
 
 export type ManutencaoComImovel = Manutencao & {
   imovel: { nome: string } | null
@@ -13,21 +15,50 @@ interface Props {
   manutencoes: ManutencaoComImovel[]
 }
 
-const FILTROS: { key: ManutencaoStatus | 'todos'; label: string }[] = [
-  { key: 'todos', label: 'Todos' },
-  { key: 'aberto', label: 'Abertos' },
-  { key: 'em_andamento', label: 'Em andamento' },
-  { key: 'concluido', label: 'Concluídos' },
-  { key: 'cancelado', label: 'Cancelados' },
+const COLUNAS: { key: ManutencaoStatus; header: string; dot: string }[] = [
+  { key: 'aberto', header: 'Aberto', dot: 'bg-amber-500' },
+  { key: 'em_andamento', header: 'Em andamento', dot: 'bg-blue-500' },
+  { key: 'concluido', header: 'Concluído', dot: 'bg-green-500' },
+  { key: 'cancelado', header: 'Cancelado', dot: 'bg-slate-400' },
 ]
 
-export default function AdminManutencaoList({ manutencoes }: Props) {
-  const [filtro, setFiltro] = useState<ManutencaoStatus | 'todos'>('todos')
+function todayISO() {
+  const d = new Date()
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
 
-  const filtradas = useMemo(
-    () => (filtro === 'todos' ? manutencoes : manutencoes.filter((m) => m.status === filtro)),
-    [manutencoes, filtro]
-  )
+export default function AdminManutencaoList({ manutencoes: initial }: Props) {
+  const router = useRouter()
+  const [manutencoes, setManutencoes] = useState(initial)
+  const [dragId, setDragId] = useState<string | null>(null)
+  const [overCol, setOverCol] = useState<ManutencaoStatus | null>(null)
+
+  const porStatus = useMemo(() => {
+    const mapa: Record<ManutencaoStatus, ManutencaoComImovel[]> = { aberto: [], em_andamento: [], concluido: [], cancelado: [] }
+    for (const m of manutencoes) mapa[m.status].push(m)
+    return mapa
+  }, [manutencoes])
+
+  const mover = async (id: string, novo: ManutencaoStatus) => {
+    const atual = manutencoes.find((m) => m.id === id)
+    if (!atual || atual.status === novo) return
+
+    setManutencoes((prev) =>
+      prev.map((m) =>
+        m.id === id
+          ? { ...m, status: novo, data_conclusao: novo === 'concluido' ? (m.data_conclusao ?? todayISO()) : m.data_conclusao }
+          : m
+      )
+    )
+
+    const supabase = createClient()
+    const patch: { status: ManutencaoStatus; atualizado_em: string; data_conclusao?: string } = {
+      status: novo,
+      atualizado_em: new Date().toISOString(),
+    }
+    if (novo === 'concluido' && !atual.data_conclusao) patch.data_conclusao = todayISO()
+    await supabase.from('manutencoes').update(patch).eq('id', id)
+  }
 
   if (manutencoes.length === 0) {
     return (
@@ -41,48 +72,75 @@ export default function AdminManutencaoList({ manutencoes }: Props) {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex gap-1 overflow-x-auto">
-        {FILTROS.map((f) => (
-          <button
-            key={f.key}
-            onClick={() => setFiltro(f.key)}
-            className={`shrink-0 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-              filtro === f.key ? 'bg-slate-800 text-white' : 'text-slate-500 hover:bg-slate-100'
-            }`}
-          >
-            {f.label}
-          </button>
-        ))}
-      </div>
-
-      <div className="space-y-3">
-        {filtradas.map((m) => (
-          <Link
-            key={m.id}
-            href={`/admin/manutencoes/${m.id}`}
-            className="block bg-white rounded-xl border border-slate-200 p-4 hover:border-slate-300 transition-colors"
-          >
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-              <div className="flex-1 min-w-0">
-                <div className="flex flex-wrap items-center gap-2 mb-1">
-                  <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${MANUTENCAO_STATUS_COLORS[m.status]}`}>
-                    {MANUTENCAO_STATUS_LABELS[m.status]}
-                  </span>
-                  <span className="text-xs text-slate-500">{m.imovel?.nome ?? 'Imóvel removido'}</span>
-                </div>
-                <p className="font-semibold text-slate-900 truncate">{m.titulo}</p>
-                {m.prestador && <p className="text-sm text-slate-500 truncate">Prestador: {m.prestador}</p>}
+    <div>
+      <p className="text-xs text-slate-400 mb-3">Arraste os cards entre as colunas para mudar o status — no celular, use o seletor no rodapé de cada card.</p>
+      <div className="flex gap-4 overflow-x-auto pb-2">
+        {COLUNAS.map((col) => {
+          const cards = porStatus[col.key]
+          return (
+            <div
+              key={col.key}
+              onDragOver={(e) => {
+                e.preventDefault()
+                if (overCol !== col.key) setOverCol(col.key)
+              }}
+              onDrop={(e) => {
+                e.preventDefault()
+                if (dragId) mover(dragId, col.key)
+                setDragId(null)
+                setOverCol(null)
+              }}
+              className={`shrink-0 w-72 rounded-xl p-3 transition-colors ${
+                overCol === col.key && dragId ? 'bg-blue-50 ring-2 ring-blue-300' : 'bg-slate-100'
+              }`}
+            >
+              <div className="flex items-center gap-2 px-1 mb-3">
+                <span className={`w-2 h-2 rounded-full ${col.dot}`} />
+                <h2 className="text-sm font-semibold text-slate-700">{col.header}</h2>
+                <span className="ml-auto text-xs font-medium text-slate-400">{cards.length}</span>
               </div>
-              <div className="flex flex-col sm:items-end shrink-0 text-sm">
-                {m.custo_referencia != null && (
-                  <span className="font-semibold text-slate-900">{formatCurrency(m.custo_referencia)}</span>
-                )}
-                <span className="text-xs text-slate-500">Aberto {formatDate(m.data_abertura)}</span>
+
+              <div className="space-y-2 min-h-[40px]">
+                {cards.map((m) => (
+                  <div
+                    key={m.id}
+                    draggable
+                    onDragStart={() => setDragId(m.id)}
+                    onDragEnd={() => {
+                      setDragId(null)
+                      setOverCol(null)
+                    }}
+                    onClick={() => router.push(`/admin/manutencoes/${m.id}`)}
+                    className={`bg-white rounded-lg border border-slate-200 p-3 cursor-pointer hover:border-slate-300 hover:shadow-sm transition-all ${
+                      dragId === m.id ? 'opacity-40' : ''
+                    }`}
+                  >
+                    <p className="font-semibold text-slate-900 text-sm leading-snug mb-1">{m.titulo}</p>
+                    <p className="text-xs text-slate-500 truncate">{m.imovel?.nome ?? 'Imóvel removido'}</p>
+                    {m.prestador && <p className="text-xs text-slate-400 truncate mt-0.5">{m.prestador}</p>}
+                    <div className="flex items-center justify-between mt-2">
+                      <span className="text-xs text-slate-400">{formatDate(m.data_abertura)}</span>
+                      {m.custo_referencia != null && (
+                        <span className="text-xs font-semibold text-slate-700">{formatCurrency(m.custo_referencia)}</span>
+                      )}
+                    </div>
+                    <select
+                      value={m.status}
+                      onClick={(e) => e.stopPropagation()}
+                      onChange={(e) => mover(m.id, e.target.value as ManutencaoStatus)}
+                      className="mt-2 w-full text-xs border border-slate-200 rounded-md px-2 py-1 text-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500 sm:hidden"
+                    >
+                      {COLUNAS.map((c) => (
+                        <option key={c.key} value={c.key}>{MANUTENCAO_STATUS_LABELS[c.key]}</option>
+                      ))}
+                    </select>
+                  </div>
+                ))}
+                {cards.length === 0 && <p className="text-xs text-slate-400 px-1 py-2">Nenhum chamado</p>}
               </div>
             </div>
-          </Link>
-        ))}
+          )
+        })}
       </div>
     </div>
   )
