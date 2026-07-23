@@ -44,3 +44,32 @@ export const INDICE_REAJUSTE_LABELS: Record<IndiceReajuste, string> = {
   outro: 'Outro',
   nenhum: 'Sem reajuste',
 }
+
+export type TipoEvento = 'criacao' | 'reajuste' | 'renovacao' | 'alteracao' | 'encerramento'
+
+export interface ContratoHistorico {
+  id: string
+  contrato_id: string
+  tipo_evento: TipoEvento
+  descricao: string | null
+  valor_anterior: number | null
+  valor_novo: number | null
+  data: string
+  criado_em: string
+}
+
+export const TIPO_EVENTO_LABELS: Record<TipoEvento, string> = {
+  criacao: 'Criação',
+  reajuste: 'Reajuste',
+  renovacao: 'Renovação',
+  alteracao: 'Alteração',
+  encerramento: 'Encerramento',
+}
+
+export const TIPO_EVENTO_COLORS: Record<TipoEvento, string> = {
+  criacao: 'bg-blue-100 text-blue-800',
+  reajuste: 'bg-amber-100 text-amber-800',
+  renovacao: 'bg-green-100 text-green-800',
+  alteracao: 'bg-slate-100 text-slate-600',
+  encerramento: 'bg-red-100 text-red-800',
+}

@@ -2,16 +2,17 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { createServerClient } from '@/lib/supabase/server'
 import AdminContratoForm from '@/components/AdminContratoForm'
-import type { Contrato } from '@/types/contrato'
+import type { Contrato, ContratoHistorico } from '@/types/contrato'
 
 export default async function ContratoEditarPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const supabase = await createServerClient()
 
-  const [{ data: contrato }, { data: imoveis }, { data: inquilinos }] = await Promise.all([
+  const [{ data: contrato }, { data: imoveis }, { data: inquilinos }, { data: historico }] = await Promise.all([
     supabase.from('contratos').select('*').eq('id', id).single(),
     supabase.from('imoveis').select('id, nome, endereco_completo').order('nome', { ascending: true }),
     supabase.from('inquilinos').select('id, nome').order('nome', { ascending: true }),
+    supabase.from('contrato_historico').select('*').eq('contrato_id', id).order('criado_em', { ascending: false }),
   ])
 
   if (!contrato) notFound()
@@ -33,6 +34,7 @@ export default async function ContratoEditarPage({ params }: { params: Promise<{
         contrato={contrato as Contrato}
         imoveis={imoveis ?? []}
         inquilinos={inquilinos ?? []}
+        historicoInicial={(historico as ContratoHistorico[]) ?? []}
       />
     </div>
   )

@@ -4,14 +4,19 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { formatCurrency, formatDate } from '@/lib/utils'
 import {
   type Contrato,
   type ContratoTipo,
   type ContratoStatus,
   type IndiceReajuste,
+  type ContratoHistorico,
+  type TipoEvento,
   CONTRATO_TIPO_LABELS,
   CONTRATO_STATUS_LABELS,
   INDICE_REAJUSTE_LABELS,
+  TIPO_EVENTO_LABELS,
+  TIPO_EVENTO_COLORS,
 } from '@/types/contrato'
 
 interface OpcaoImovel {
@@ -28,6 +33,15 @@ interface Props {
   contrato?: Contrato
   imoveis: OpcaoImovel[]
   inquilinos: OpcaoInquilino[]
+  historicoInicial?: ContratoHistorico[]
+}
+
+type NovoEvento = {
+  contrato_id: string
+  tipo_evento: TipoEvento
+  descricao: string
+  valor_anterior?: number | null
+  valor_novo?: number | null
 }
 
 const inputClass = 'w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
@@ -47,7 +61,7 @@ function Field({ label, required, children }: { label: string; required?: boolea
 
 const numOuNull = (s: string) => (s.trim() === '' ? null : Number(s))
 
-export default function AdminContratoForm({ contrato, imoveis, inquilinos }: Props) {
+export default function AdminContratoForm({ contrato, imoveis, inquilinos, historicoInicial = [] }: Props) {
   const router = useRouter()
   const isEditing = !!contrato
 
@@ -111,6 +125,33 @@ export default function AdminContratoForm({ contrato, imoveis, inquilinos }: Pro
         setSaving(false)
         return
       }
+
+      // Registra automaticamente os eventos relevantes no histórico.
+      const eventos: NovoEvento[] = []
+      const valorAntigo = contrato.valor_aluguel
+      const valorNovo = payload.valor_aluguel
+      if (valorAntigo !== valorNovo) {
+        eventos.push({ contrato_id: contrato.id, tipo_evento: 'reajuste', descricao: 'Valor do aluguel alterado', valor_anterior: valorAntigo, valor_novo: valorNovo })
+      }
+      if (contrato.status !== status) {
+        if (status === 'encerrado') eventos.push({ contrato_id: contrato.id, tipo_evento: 'encerramento', descricao: 'Contrato encerrado' })
+        else if (status === 'renovado') eventos.push({ contrato_id: contrato.id, tipo_evento: 'renovacao', descricao: 'Contrato renovado' })
+        else eventos.push({ contrato_id: contrato.id, tipo_evento: 'alteracao', descricao: `Situação alterada para ${CONTRATO_STATUS_LABELS[status]}` })
+      }
+      const outrosMudaram =
+        contrato.tipo !== tipo ||
+        contrato.data_inicio !== (dataInicio || null) ||
+        (contrato.data_fim ?? null) !== (dataFim || null) ||
+        (contrato.dia_vencimento ?? null) !== numOuNull(diaVencimento) ||
+        (contrato.indice_reajuste ?? null) !== indice ||
+        (contrato.mes_reajuste ?? null) !== numOuNull(mesReajuste)
+      if (outrosMudaram) {
+        eventos.push({ contrato_id: contrato.id, tipo_evento: 'alteracao', descricao: 'Termos do contrato atualizados' })
+      }
+      if (eventos.length > 0) {
+        await supabase.from('contrato_historico').insert(eventos)
+      }
+
       await sincronizarSituacaoImovel(supabase, imovelId, status)
       setSaving(false)
       setSaved(true)
@@ -122,6 +163,7 @@ export default function AdminContratoForm({ contrato, imoveis, inquilinos }: Pro
         setSaving(false)
         return
       }
+      await supabase.from('contrato_historico').insert({ contrato_id: data.id, tipo_evento: 'criacao', descricao: 'Contrato criado' })
       await sincronizarSituacaoImovel(supabase, imovelId, status)
       router.push('/admin/gestao/contratos')
     }
@@ -227,6 +269,34 @@ export default function AdminContratoForm({ contrato, imoveis, inquilinos }: Pro
         </button>
         {saved && <span className="text-sm text-green-600 font-medium">Salvo ✓</span>}
       </div>
+
+      {isEditing && (
+        <div className="bg-white rounded-xl border border-slate-200 p-6">
+          <h2 className="font-semibold text-slate-900 text-base border-b border-slate-100 pb-3 mb-4">Histórico de alterações</h2>
+          {historicoInicial.length === 0 ? (
+            <p className="text-sm text-slate-400">Nenhum evento registrado ainda.</p>
+          ) : (
+            <ol className="space-y-3">
+              {historicoInicial.map((ev) => (
+                <li key={ev.id} className="flex items-start gap-3">
+                  <span className={`text-xs font-semibold px-2 py-0.5 rounded-full shrink-0 ${TIPO_EVENTO_COLORS[ev.tipo_evento]}`}>
+                    {TIPO_EVENTO_LABELS[ev.tipo_evento]}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm text-slate-700">{ev.descricao}</p>
+                    {ev.tipo_evento === 'reajuste' && (
+                      <p className="text-xs text-slate-500 mt-0.5">
+                        {ev.valor_anterior != null ? formatCurrency(ev.valor_anterior) : '—'} → {ev.valor_novo != null ? formatCurrency(ev.valor_novo) : '—'}
+                      </p>
+                    )}
+                  </div>
+                  <span className="text-xs text-slate-400 shrink-0">{formatDate(ev.criado_em)}</span>
+                </li>
+              ))}
+            </ol>
+          )}
+        </div>
+      )}
     </form>
   )
 }
