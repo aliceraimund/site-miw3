@@ -61,6 +61,13 @@ export default async function ImovelPage({ params }: { params: Promise<{ id: str
   const i = imovel
   const phone = i.whatsapp || PHONE
 
+  // Evita duplicar a política quando o texto já foi digitado manualmente na descrição.
+  const normalizar = (s: string) => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+  const descNormalizada = normalizar(i.descricao ?? '')
+  const temPoliticaNaDescricao =
+    descNormalizada.includes('politica de remuneracao para imobiliaria') ||
+    descNormalizada.includes('miw3 valoriza parcerias')
+
   const price = i.valor_livre_venda || i.valor_livre ? undefined : i.preco_venda ?? i.preco_locacao ?? undefined
 
   const jsonLd = {
@@ -164,14 +171,16 @@ export default async function ImovelPage({ params }: { params: Promise<{ id: str
           <div className="bg-white rounded-xl p-6 border border-slate-200">
             <h2 className="font-semibold text-slate-900 mb-3">Descrição</h2>
             {i.descricao && <p className="text-slate-600 leading-relaxed whitespace-pre-line">{i.descricao}</p>}
-            <div className="mt-4 text-slate-600 leading-relaxed">
-              <p>A MIW3 valoriza parcerias transparentes, duradouras e equilibradas. Para tanto, nossa política de remuneração para imobiliária é simples e objetiva:</p>
-              <ul className="list-disc pl-5 mt-2 space-y-1">
-                <li>100% do primeiro aluguel pela intermediação e efetivação da locação;</li>
-                <li>Percentual mensal de administração previamente acordado durante toda a vigência do contrato;</li>
-                <li>Manutenção do mesmo percentual nas renovações, sem cobrança de nova comissão ou taxa de renovação.</li>
-              </ul>
-            </div>
+            {!temPoliticaNaDescricao && (
+              <div className={`text-slate-600 leading-relaxed ${i.descricao ? 'mt-4' : ''}`}>
+                <p>A MIW3 valoriza parcerias transparentes, duradouras e equilibradas. Para tanto, nossa política de remuneração para imobiliária é simples e objetiva:</p>
+                <ul className="list-disc pl-5 mt-2 space-y-1">
+                  <li>100% do primeiro aluguel pela intermediação e efetivação da locação;</li>
+                  <li>Percentual mensal de administração previamente acordado durante toda a vigência do contrato;</li>
+                  <li>Manutenção do mesmo percentual nas renovações, sem cobrança de nova comissão ou taxa de renovação.</li>
+                </ul>
+              </div>
+            )}
           </div>
         </div>
 
