@@ -55,9 +55,9 @@ export default function FilterTabs({ activeCat, activeDisp, activeCidade, active
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Busca */}
-        <div className="pt-3 pb-2">
+        <div className="pt-5 pb-3">
           <div className="relative">
-            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z" />
             </svg>
             <input
@@ -68,7 +68,7 @@ export default function FilterTabs({ activeCat, activeDisp, activeCidade, active
                 setQ(e.target.value)
               }}
               placeholder="Buscar por nome, cidade, bairro ou tipo de imóvel..."
-              className="w-full border border-slate-300 rounded-lg pl-9 pr-9 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full border border-slate-300 rounded-xl pl-11 pr-10 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
             {q && (
               <button
@@ -89,7 +89,7 @@ export default function FilterTabs({ activeCat, activeDisp, activeCidade, active
         </div>
 
         {/* Row 1: Categoria */}
-        <div className="flex gap-1 overflow-x-auto pb-2 border-b border-slate-100">
+        <div className="flex gap-2 overflow-x-auto py-3 border-b border-slate-100">
           <Link
             href={buildUrl({ disponivel_para: activeDisp, cidade: activeCidade, q })}
             scroll={false}
@@ -110,7 +110,7 @@ export default function FilterTabs({ activeCat, activeDisp, activeCidade, active
         </div>
 
         {/* Row 2: Disponibilidade */}
-        <div className="flex gap-1 overflow-x-auto py-2">
+        <div className="flex gap-2 overflow-x-auto py-3">
           {DISPONIVEL_TABS.map((t) => (
             <Link
               key={t.key}
@@ -125,7 +125,7 @@ export default function FilterTabs({ activeCat, activeDisp, activeCidade, active
 
         {/* Row 3: Cidades (geradas automaticamente dos anúncios publicados) */}
         {cidades.length > 0 && (
-          <div className="flex gap-1 overflow-x-auto pb-3 items-center">
+          <div className="flex gap-2 overflow-x-auto pt-3 pb-5 items-center border-t border-slate-100">
             <span className="shrink-0 text-xs font-semibold text-slate-400 pr-1 flex items-center gap-1">
               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
@@ -136,7 +136,7 @@ export default function FilterTabs({ activeCat, activeDisp, activeCidade, active
             <Link
               href={buildUrl({ categoria: activeCat, disponivel_para: activeDisp, q })}
               scroll={false}
-              className={`shrink-0 px-3 py-1 rounded-full text-xs font-medium transition-colors border ${!activeCidade ? 'bg-blue-600 text-white border-blue-600' : 'text-slate-600 border-slate-200 hover:bg-slate-100'}`}
+              className={`shrink-0 px-3.5 py-1.5 rounded-full text-xs font-medium transition-colors border ${!activeCidade ? 'bg-blue-600 text-white border-blue-600' : 'text-slate-600 border-slate-200 hover:bg-slate-100'}`}
             >
               Todas
             </Link>
@@ -145,7 +145,7 @@ export default function FilterTabs({ activeCat, activeDisp, activeCidade, active
                 key={cidade}
                 href={buildUrl({ categoria: activeCat, disponivel_para: activeDisp, cidade, q })}
                 scroll={false}
-                className={`shrink-0 px-3 py-1 rounded-full text-xs font-medium transition-colors border ${activeCidade === cidade ? 'bg-blue-600 text-white border-blue-600' : 'text-slate-600 border-slate-200 hover:bg-slate-100'}`}
+                className={`shrink-0 px-3.5 py-1.5 rounded-full text-xs font-medium transition-colors border ${activeCidade === cidade ? 'bg-blue-600 text-white border-blue-600' : 'text-slate-600 border-slate-200 hover:bg-slate-100'}`}
               >
                 {cidade}
               </Link>
