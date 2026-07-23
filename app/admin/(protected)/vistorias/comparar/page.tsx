@@ -12,13 +12,13 @@ export default async function CompararPage({ searchParams }: Props) {
   const { imovel, entrada, saida } = await searchParams
   const supabase = await createServerClient()
 
-  const { data: imoveis } = await supabase.from('imoveis_vistoria').select('*').order('nome')
+  const { data: imoveis } = await supabase.from('imoveis').select('id, nome, endereco:endereco_completo, categoria').order('nome')
 
   let vistoriasDoImovel: Vistoria[] = []
   if (imovel) {
     const { data } = await supabase
       .from('vistorias')
-      .select('*, imoveis_vistoria(*)')
+      .select('*, imovel:imoveis(nome, endereco:endereco_completo)')
       .eq('imovel_id', imovel)
       .order('data', { ascending: false })
     vistoriasDoImovel = (data ?? []) as Vistoria[]
@@ -31,8 +31,8 @@ export default async function CompararPage({ searchParams }: Props) {
 
   if (entrada && saida) {
     const [ve, vs, ie, is_] = await Promise.all([
-      supabase.from('vistorias').select('*, imoveis_vistoria(*)').eq('id', entrada).single(),
-      supabase.from('vistorias').select('*, imoveis_vistoria(*)').eq('id', saida).single(),
+      supabase.from('vistorias').select('*, imovel:imoveis(nome, endereco:endereco_completo)').eq('id', entrada).single(),
+      supabase.from('vistorias').select('*, imovel:imoveis(nome, endereco:endereco_completo)').eq('id', saida).single(),
       supabase.from('vistoria_itens').select('*, vistoria_fotos(*)').eq('vistoria_id', entrada).order('ordem'),
       supabase.from('vistoria_itens').select('*, vistoria_fotos(*)').eq('vistoria_id', saida).order('ordem'),
     ])

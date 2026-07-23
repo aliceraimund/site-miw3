@@ -5,7 +5,7 @@ import type { ImovelVistoria } from '@/types/vistoria'
 
 export default async function NovaVistoriaPage() {
   const supabase = await createServerClient()
-  const { data: imoveis } = await supabase.from('imoveis_vistoria').select('*').order('nome')
+  const { data: imoveis } = await supabase.from('imoveis').select('id, nome, endereco:endereco_completo, categoria').order('nome')
 
   return (
     <div>

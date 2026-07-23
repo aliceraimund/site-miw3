@@ -54,8 +54,8 @@ export default function AdminVistoriaList({ vistorias: initialVistorias }: Props
               </span>
               <span className="text-xs text-slate-500">{formatDate(vistoria.data)}</span>
             </div>
-            <p className="font-semibold text-slate-900 truncate">{vistoria.imoveis_vistoria?.nome ?? 'Imóvel removido'}</p>
-            <p className="text-sm text-slate-500 truncate">{vistoria.imoveis_vistoria?.endereco}</p>
+            <p className="font-semibold text-slate-900 truncate">{vistoria.imovel?.nome ?? 'Imóvel removido'}</p>
+            <p className="text-sm text-slate-500 truncate">{vistoria.imovel?.endereco}</p>
             {(vistoria.vistoriador || vistoria.locatario) && (
               <div className="flex gap-3 mt-1 text-xs text-slate-500">
                 {vistoria.vistoriador && <span>Vistoriador: {vistoria.vistoriador}</span>}

@@ -3,12 +3,18 @@ export type TipoVistoria = 'entrada' | 'saida'
 export type StatusVistoria = 'rascunho' | 'concluida'
 export type EstadoItem = 'bom' | 'regular' | 'avaria' | 'na'
 
+// Opção de imóvel para a vistoria — agora vinda do cadastro unificado (tabela imoveis).
 export interface ImovelVistoria {
   id: string
   nome: string
   endereco: string
-  tipo: TipoImovelVistoria
-  criado_em: string
+  categoria: string
+}
+
+// A vistoria monta o checklist por tipo (residencial/comercial); imóveis
+// industriais usam o checklist comercial.
+export function categoriaParaTipoVistoria(categoria: string): TipoImovelVistoria {
+  return categoria === 'residencial' ? 'residencial' : 'comercial'
 }
 
 export interface ChecklistTemplateItem {
@@ -45,7 +51,7 @@ export interface Vistoria {
   status: StatusVistoria
   criado_em: string
   atualizado_em: string
-  imoveis_vistoria?: ImovelVistoria
+  imovel?: { nome: string; endereco: string } | null
 }
 
 export interface VistoriaItem {

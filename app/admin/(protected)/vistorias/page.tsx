@@ -15,7 +15,7 @@ export default async function VistoriasPage({ searchParams }: Props) {
 
   let query = supabase
     .from('vistorias')
-    .select('*, imoveis_vistoria(*)')
+    .select('*, imovel:imoveis(nome, endereco:endereco_completo)')
     .order('criado_em', { ascending: false })
 
   if (imovel) query = query.eq('imovel_id', imovel)
@@ -23,7 +23,7 @@ export default async function VistoriasPage({ searchParams }: Props) {
   if (status) query = query.eq('status', status)
 
   const { data: vistorias } = await query
-  const { data: imoveis } = await supabase.from('imoveis_vistoria').select('*').order('nome')
+  const { data: imoveis } = await supabase.from('imoveis').select('id, nome, endereco:endereco_completo, categoria').order('nome')
 
   return (
     <div>

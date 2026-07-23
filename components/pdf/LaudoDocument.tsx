@@ -60,8 +60,8 @@ export default function LaudoDocument({ vistoria, itens, logoUrl }: Props) {
             <Text style={styles.title}>
               Laudo de Vistoria — {vistoria.tipo_vistoria === 'entrada' ? 'Entrada' : 'Saída'}
             </Text>
-            <Text style={styles.subtitle}>{vistoria.imoveis_vistoria?.nome}</Text>
-            <Text style={styles.subtitle}>{vistoria.imoveis_vistoria?.endereco}</Text>
+            <Text style={styles.subtitle}>{vistoria.imovel?.nome}</Text>
+            <Text style={styles.subtitle}>{vistoria.imovel?.endereco}</Text>
           </View>
         </View>
 

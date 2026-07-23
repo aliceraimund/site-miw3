@@ -3,8 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import ImovelVistoriaSelect from '@/components/ImovelVistoriaSelect'
-import type { ImovelVistoria, TipoVistoria, ChaveEntregue } from '@/types/vistoria'
+import { type ImovelVistoria, type TipoVistoria, type ChaveEntregue, categoriaParaTipoVistoria } from '@/types/vistoria'
 
 const inputClass = 'w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
 
@@ -30,9 +29,8 @@ interface Props {
   imoveis: ImovelVistoria[]
 }
 
-export default function AdminVistoriaNovaForm({ imoveis: initialImoveis }: Props) {
+export default function AdminVistoriaNovaForm({ imoveis }: Props) {
   const router = useRouter()
-  const [imoveis, setImoveis] = useState(initialImoveis)
   const [imovelId, setImovelId] = useState('')
   const [tipoVistoria, setTipoVistoria] = useState<TipoVistoria>('entrada')
   const [data, setData] = useState(todayISO())
@@ -90,7 +88,7 @@ export default function AdminVistoriaNovaForm({ imoveis: initialImoveis }: Props
     const { data: templates, error: templatesError } = await supabase
       .from('vistoria_checklist_templates')
       .select('*')
-      .eq('tipo_imovel', imovel.tipo)
+      .eq('tipo_imovel', categoriaParaTipoVistoria(imovel.categoria))
       .eq('ativo', true)
       .order('ordem')
 
@@ -129,15 +127,16 @@ export default function AdminVistoriaNovaForm({ imoveis: initialImoveis }: Props
         <h2 className="font-semibold text-slate-900 text-base border-b border-slate-100 pb-3">Imóvel e tipo</h2>
 
         <Field label="Imóvel" required>
-          <ImovelVistoriaSelect
-            imoveis={imoveis}
-            value={imovelId}
-            onChange={setImovelId}
-            onCreated={(novo) => {
-              setImoveis((prev) => [...prev, novo])
-              setImovelId(novo.id)
-            }}
-          />
+          <select value={imovelId} onChange={(e) => setImovelId(e.target.value)} className={inputClass}>
+            <option value="">Selecione...</option>
+            {imoveis.map((i) => (
+              <option key={i.id} value={i.id}>{i.nome} — {i.endereco}</option>
+            ))}
+          </select>
+          <p className="text-xs text-slate-400 mt-1">
+            O imóvel vem do cadastro. Para adicionar um novo, use a aba{' '}
+            <a href="/admin/gestao" className="text-blue-600 hover:underline">Gestão</a>.
+          </p>
         </Field>
 
         <Field label="Tipo de vistoria" required>

@@ -9,7 +9,7 @@ export default async function VistoriaPage({ params }: { params: Promise<{ id: s
 
   const { data: vistoria } = await supabase
     .from('vistorias')
-    .select('*, imoveis_vistoria(*)')
+    .select('*, imovel:imoveis(nome, endereco:endereco_completo)')
     .eq('id', id)
     .single()
 

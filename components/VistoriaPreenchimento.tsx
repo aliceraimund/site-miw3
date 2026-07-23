@@ -481,7 +481,7 @@ export default function VistoriaPreenchimento({ vistoria, itensIniciais }: Props
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
         </Link>
-        <h1 className="text-xl font-bold text-slate-900 truncate">{vistoria.imoveis_vistoria?.nome ?? 'Vistoria'}</h1>
+        <h1 className="text-xl font-bold text-slate-900 truncate">{vistoria.imovel?.nome ?? 'Vistoria'}</h1>
       </div>
 
       <div className="bg-white rounded-xl border border-slate-200 p-4 sm:p-6">
@@ -491,7 +491,7 @@ export default function VistoriaPreenchimento({ vistoria, itensIniciais }: Props
               <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${STATUS_VISTORIA_COLORS[status]}`}>{STATUS_VISTORIA_LABELS[status]}</span>
               <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">{TIPO_VISTORIA_LABELS[vistoria.tipo_vistoria]}</span>
             </div>
-            <p className="text-sm text-slate-500">{vistoria.imoveis_vistoria?.endereco}</p>
+            <p className="text-sm text-slate-500">{vistoria.imovel?.endereco}</p>
           </div>
           <SaveIndicator state={saveState} />
         </div>
