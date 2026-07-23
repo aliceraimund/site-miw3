@@ -40,6 +40,7 @@ const INITIAL: FormData = {
   valor_livre_venda: false,
   whatsapp: null,
   ordem: null,
+  gerido: false,
 }
 
 function Field({ label, children, required, hint }: { label: string; children: React.ReactNode; required?: boolean; hint?: string }) {

@@ -61,7 +61,7 @@ export default function AdminImovelList({ imoveis: initialImoveis }: Props) {
 
     const { data, error } = await supabase
       .from('imoveis')
-      .insert({ ...rest, fotos: newFotos.length > 0 ? newFotos : null, nome: `${imovel.nome} (cópia)`, publicado: false })
+      .insert({ ...rest, fotos: newFotos.length > 0 ? newFotos : null, nome: `${imovel.nome} (cópia)`, publicado: false, gerido: false })
       .select('*')
       .single()
 
