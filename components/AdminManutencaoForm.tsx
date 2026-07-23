@@ -161,7 +161,7 @@ export default function AdminManutencaoForm({ manutencao, imoveis, fotosIniciais
         setSaving(false)
         return
       }
-      router.push(`/admin/gestao/manutencoes/${data.id}`)
+      router.push(`/admin/manutencoes/${data.id}`)
     }
   }
 
@@ -259,7 +259,7 @@ export default function AdminManutencaoForm({ manutencao, imoveis, fotosIniciais
         <button type="submit" disabled={saving} className="bg-blue-600 text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50">
           {saving ? 'Salvando...' : isEditing ? 'Salvar alterações' : 'Abrir chamado'}
         </button>
-        <button type="button" onClick={() => router.push('/admin/gestao/manutencoes')} className="px-5 py-2.5 text-sm text-slate-600 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors">
+        <button type="button" onClick={() => router.push('/admin/manutencoes')} className="px-5 py-2.5 text-sm text-slate-600 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors">
           {isEditing ? 'Voltar' : 'Cancelar'}
         </button>
         {saved && <span className="text-sm text-green-600 font-medium">Salvo ✓</span>}

@@ -21,7 +21,8 @@ export default function AdminNav({ userEmail }: Props) {
 
   const isVistorias = pathname?.startsWith('/admin/vistorias')
   const isGestao = pathname?.startsWith('/admin/gestao')
-  const isAnuncios = !isVistorias && !isGestao
+  const isManutencao = pathname?.startsWith('/admin/manutencoes')
+  const isAnuncios = !isVistorias && !isGestao && !isManutencao
 
   return (
     <nav className="bg-slate-900 text-white px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
@@ -41,6 +42,12 @@ export default function AdminNav({ userEmail }: Props) {
             className={`text-sm transition-colors ${isGestao ? 'text-white font-semibold' : 'text-slate-300 hover:text-white'}`}
           >
             Gestão
+          </Link>
+          <Link
+            href="/admin/manutencoes"
+            className={`text-sm transition-colors ${isManutencao ? 'text-white font-semibold' : 'text-slate-300 hover:text-white'}`}
+          >
+            Manutenção
           </Link>
           <Link
             href="/admin/vistorias"

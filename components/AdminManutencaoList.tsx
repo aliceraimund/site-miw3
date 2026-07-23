@@ -33,7 +33,7 @@ export default function AdminManutencaoList({ manutencoes }: Props) {
     return (
       <div className="bg-white rounded-xl border border-slate-200 p-12 text-center">
         <p className="text-slate-500">Nenhum chamado de manutenção.</p>
-        <Link href="/admin/gestao/manutencoes/novo" className="mt-4 inline-block text-blue-600 hover:underline text-sm">
+        <Link href="/admin/manutencoes/novo" className="mt-4 inline-block text-blue-600 hover:underline text-sm">
           Abrir primeiro chamado
         </Link>
       </div>
@@ -60,7 +60,7 @@ export default function AdminManutencaoList({ manutencoes }: Props) {
         {filtradas.map((m) => (
           <Link
             key={m.id}
-            href={`/admin/gestao/manutencoes/${m.id}`}
+            href={`/admin/manutencoes/${m.id}`}
             className="block bg-white rounded-xl border border-slate-200 p-4 hover:border-slate-300 transition-colors"
           >
             <div className="flex flex-col sm:flex-row sm:items-center gap-3">
