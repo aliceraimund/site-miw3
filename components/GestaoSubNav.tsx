@@ -4,8 +4,15 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
 const ITENS = [
-  { href: '/admin/gestao', label: 'Imóveis', match: (p: string) => p === '/admin/gestao' || (p.startsWith('/admin/gestao/') && !p.startsWith('/admin/gestao/inquilinos')) },
+  {
+    href: '/admin/gestao',
+    label: 'Imóveis',
+    match: (p: string) =>
+      p === '/admin/gestao' ||
+      (p.startsWith('/admin/gestao/') && !p.startsWith('/admin/gestao/inquilinos') && !p.startsWith('/admin/gestao/contratos')),
+  },
   { href: '/admin/gestao/inquilinos', label: 'Inquilinos', match: (p: string) => p.startsWith('/admin/gestao/inquilinos') },
+  { href: '/admin/gestao/contratos', label: 'Contratos', match: (p: string) => p.startsWith('/admin/gestao/contratos') },
 ]
 
 export default function GestaoSubNav() {
