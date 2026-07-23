@@ -54,6 +54,7 @@ async function CategoriaSection({
     .select('*')
     .eq('publicado', true)
     .in('categoria', categoria.keys)
+    .order('ordem', { ascending: true, nullsFirst: false })
     .order('destaque', { ascending: false })
     .order('criado_em', { ascending: false })
 

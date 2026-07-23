@@ -28,5 +28,6 @@ export interface Imovel {
   valor_livre: boolean
   valor_livre_venda: boolean
   whatsapp: string | null
+  ordem: number | null
   criado_em: string
 }
