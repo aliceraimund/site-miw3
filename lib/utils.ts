@@ -11,6 +11,24 @@ export function formatArea(value: number): string {
   return `${value.toLocaleString('pt-BR')} m²`
 }
 
+// Padroniza títulos em "Title Case": inicial maiúscula em cada palavra,
+// mantendo conectores (de, do, da...) em minúsculo (exceto na primeira palavra).
+const CONECTORES_TITULO = new Set(['de', 'do', 'da', 'dos', 'das', 'e', 'a', 'o', 'com', 'em', 'para'])
+
+export function formatTitulo(texto: string): string {
+  const tokens = texto.toLowerCase().split(/(\s+)/)
+  let primeira = true
+  return tokens
+    .map((tok) => {
+      if (tok.trim() === '') return tok
+      const ehConector = CONECTORES_TITULO.has(tok)
+      if (ehConector && !primeira) return tok
+      primeira = false
+      return tok.replace(/\p{L}/u, (c) => c.toUpperCase())
+    })
+    .join('')
+}
+
 export const STATUS_LABELS: Record<string, string> = {
   disponivel: 'Disponível',
   em_reforma: 'Em reforma',

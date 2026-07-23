@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { type Imovel } from '@/types/imovel'
-import { formatArea, formatCurrency, STATUS_LABELS, STATUS_COLORS, DISPONIVEL_LABELS, DISPONIVEL_COLORS } from '@/lib/utils'
+import { formatArea, formatCurrency, formatTitulo, STATUS_LABELS, STATUS_COLORS, DISPONIVEL_LABELS, DISPONIVEL_COLORS } from '@/lib/utils'
 import PriceDisplay from './PriceDisplay'
 
 interface Props {
@@ -58,7 +58,7 @@ export default function ImovelCard({ imovel }: Props) {
 
       <div className="relative p-4">
         <p className="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-1">{imovel.tipo}</p>
-        <h3 className="font-semibold text-slate-900 text-base leading-snug mb-1 line-clamp-2">{imovel.nome}</h3>
+        <h3 className="font-semibold text-slate-900 text-base leading-snug mb-1 line-clamp-2">{formatTitulo(imovel.nome)}</h3>
         <p className="text-sm text-slate-500 mb-3 line-clamp-1">{imovel.endereco_completo}</p>
 
         <div className="flex flex-wrap gap-3 text-sm text-slate-600 mb-4 pb-4 border-b border-slate-100">

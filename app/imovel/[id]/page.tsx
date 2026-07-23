@@ -7,7 +7,7 @@ import ImageGallery from '@/components/ImageGallery'
 import PriceDisplay from '@/components/PriceDisplay'
 import WhatsAppFloat from '@/components/WhatsAppFloat'
 import ShareButton from '@/components/ShareButton'
-import { formatArea, STATUS_LABELS, STATUS_COLORS, DISPONIVEL_LABELS, DISPONIVEL_COLORS } from '@/lib/utils'
+import { formatArea, formatTitulo, STATUS_LABELS, STATUS_COLORS, DISPONIVEL_LABELS, DISPONIVEL_COLORS } from '@/lib/utils'
 import type { Imovel } from '@/types/imovel'
 
 const PHONE = '5511972793005'
@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   if (!imovel || !imovel.publicado) return {}
 
   const i = imovel
-  const title = `${i.nome} — ${i.bairro}, ${i.cidade}`
+  const title = `${formatTitulo(i.nome)} — ${i.bairro}, ${i.cidade}`
   const description = `${i.tipo} em ${i.bairro}, ${i.cidade}. ${formatArea(i.area_m2)}${i.quartos != null ? `, ${i.quartos} quartos` : ''}. ${DISPONIVEL_LABELS[i.disponivel_para]} com a MIW3.`
   const image = i.fotos?.[0]
 
@@ -127,7 +127,7 @@ export default async function ImovelPage({ params }: { params: Promise<{ id: str
             </div>
 
             <p className="text-sm font-semibold text-blue-600 uppercase tracking-wider mb-1">{i.tipo}</p>
-            <h1 className="text-2xl md:text-3xl font-bold text-slate-900 mb-2">{i.nome}</h1>
+            <h1 className="text-2xl md:text-3xl font-bold text-slate-900 mb-2">{formatTitulo(i.nome)}</h1>
             <p className="text-slate-500 flex items-start gap-1.5">
               <svg className="w-4 h-4 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
