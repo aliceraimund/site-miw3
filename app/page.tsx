@@ -36,16 +36,14 @@ const CATEGORIAS = [
   },
 ]
 
-async function CategoriaSection({
-  categoria,
+async function Listings({
   activeCat,
   activeDisp,
 }: {
-  categoria: typeof CATEGORIAS[0]
   activeCat: string
   activeDisp: string
 }) {
-  if (activeCat && activeCat !== categoria.tabKey) return null
+  const categoria = CATEGORIAS.find((c) => c.tabKey === activeCat)
 
   const supabase = await createServerClient()
 
@@ -53,10 +51,13 @@ async function CategoriaSection({
     .from('imoveis')
     .select('*')
     .eq('publicado', true)
-    .in('categoria', categoria.keys)
     .order('ordem', { ascending: true, nullsFirst: false })
     .order('destaque', { ascending: false })
     .order('criado_em', { ascending: false })
+
+  if (categoria) {
+    query = query.in('categoria', categoria.keys)
+  }
 
   if (activeDisp === 'venda') {
     query = query.or('disponivel_para.eq.venda,disponivel_para.eq.ambos')
@@ -68,17 +69,27 @@ async function CategoriaSection({
 
   const { data: imoveis } = await query
 
-  if (!imoveis || imoveis.length === 0) return null
+  if (!imoveis || imoveis.length === 0) {
+    return (
+      <div className="bg-white rounded-xl border border-slate-200 p-12 text-center">
+        <p className="text-slate-500">Nenhum imóvel encontrado para este filtro.</p>
+      </div>
+    )
+  }
 
   return (
     <section className="mb-14">
       <div className="flex items-center gap-3 mb-6">
         <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-blue-50 text-blue-600 shrink-0">
-          {categoria.icon}
+          {categoria ? categoria.icon : (
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+            </svg>
+          )}
         </div>
         <div>
-          <h2 className="text-xl font-bold text-slate-900">{categoria.label}</h2>
-          <p className="text-sm text-slate-500">{categoria.desc}</p>
+          <h2 className="text-xl font-bold text-slate-900">{categoria ? categoria.label : 'Todos os imóveis'}</h2>
+          <p className="text-sm text-slate-500">{categoria ? categoria.desc : 'Residenciais, comerciais e industriais para venda e locação'}</p>
         </div>
         <span className="ml-auto text-xs font-semibold text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full">
           {imoveis.length} {imoveis.length === 1 ? 'imóvel' : 'imóveis'}
@@ -162,9 +173,7 @@ export default async function HomePage({
             {[...Array(6)].map((_, i) => <div key={i} className="bg-white rounded-xl h-80 animate-pulse shadow-sm" />)}
           </div>
         }>
-          {CATEGORIAS.map((cat) => (
-            <CategoriaSection key={cat.tabKey} categoria={cat} activeCat={activeCat} activeDisp={activeDisp} />
-          ))}
+          <Listings activeCat={activeCat} activeDisp={activeDisp} />
         </Suspense>
       </div>
 
