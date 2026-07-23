@@ -161,12 +161,18 @@ export default async function ImovelPage({ params }: { params: Promise<{ id: str
             )}
           </div>
 
-          {i.descricao && (
-            <div className="bg-white rounded-xl p-6 border border-slate-200">
-              <h2 className="font-semibold text-slate-900 mb-3">Descrição</h2>
-              <p className="text-slate-600 leading-relaxed whitespace-pre-line">{i.descricao}</p>
+          <div className="bg-white rounded-xl p-6 border border-slate-200">
+            <h2 className="font-semibold text-slate-900 mb-3">Descrição</h2>
+            {i.descricao && <p className="text-slate-600 leading-relaxed whitespace-pre-line">{i.descricao}</p>}
+            <div className="mt-4 text-slate-600 leading-relaxed">
+              <p>A MIW3 valoriza parcerias transparentes, duradouras e equilibradas. Para tanto, nossa política de remuneração para imobiliária é simples e objetiva:</p>
+              <ul className="list-disc pl-5 mt-2 space-y-1">
+                <li>100% do primeiro aluguel pela intermediação e efetivação da locação;</li>
+                <li>Percentual mensal de administração previamente acordado durante toda a vigência do contrato;</li>
+                <li>Manutenção do mesmo percentual nas renovações, sem cobrança de nova comissão ou taxa de renovação.</li>
+              </ul>
             </div>
-          )}
+          </div>
         </div>
 
         <div className="space-y-4 sticky top-6 self-start">
