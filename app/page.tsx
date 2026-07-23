@@ -13,11 +13,46 @@ interface SearchParams {
   q?: string
 }
 
-async function getCidades(): Promise<string[]> {
+// Chave de agrupamento: ignora maiúsculas, acentos, vírgulas e o sufixo do estado (", SP").
+function chaveCidade(s: string): string {
+  return s
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/,/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .replace(/\s+(sp|sao paulo)$/, '')
+    .trim()
+}
+
+// Agrupa as cidades cadastradas (que podem estar escritas de formas diferentes) em
+// grupos com um rótulo canônico e todas as variações que existem no banco.
+async function getCidadeGrupos(): Promise<{ label: string; variants: string[] }[]> {
   const supabase = await createServerClient()
   const { data } = await supabase.from('imoveis').select('cidade').eq('publicado', true)
-  const unicas = new Set((data ?? []).map((r) => r.cidade).filter(Boolean) as string[])
-  return [...unicas].sort((a, b) => a.localeCompare(b, 'pt-BR'))
+  const raw = (data ?? []).map((r) => r.cidade).filter(Boolean) as string[]
+
+  const grupos = new Map<string, string[]>()
+  for (const cidade of raw) {
+    const chave = chaveCidade(cidade)
+    if (!chave) continue
+    if (!grupos.has(chave)) grupos.set(chave, [])
+    const arr = grupos.get(chave)!
+    if (!arr.includes(cidade)) arr.push(cidade)
+  }
+
+  const escolherRotulo = (variants: string[]): string => {
+    const semVirgula = variants.filter((v) => !v.includes(','))
+    const pool1 = semVirgula.length ? semVirgula : variants
+    const naoMaiusculo = pool1.filter((v) => v !== v.toUpperCase())
+    const pool2 = naoMaiusculo.length ? naoMaiusculo : pool1
+    return [...pool2].sort((a, b) => a.length - b.length)[0]
+  }
+
+  return [...grupos.values()]
+    .map((variants) => ({ label: escolherRotulo(variants), variants }))
+    .sort((a, b) => a.label.localeCompare(b.label, 'pt-BR'))
 }
 
 const CATEGORIAS = [
@@ -73,7 +108,11 @@ async function Listings({
   }
 
   if (activeCidade) {
-    query = query.eq('cidade', activeCidade)
+    // activeCidade é o rótulo canônico; casa com todas as variações escritas no banco.
+    const grupos = await getCidadeGrupos()
+    const grupo = grupos.find((g) => g.label === activeCidade)
+    const variants = grupo?.variants ?? [activeCidade]
+    query = query.in('cidade', variants)
   }
 
   // Busca por texto em nome, cidade, bairro, tipo e endereço.
@@ -146,7 +185,7 @@ export default async function HomePage({
   const activeDisp = sp.disponivel_para ?? ''
   const activeCidade = sp.cidade ?? ''
   const activeQ = sp.q ?? ''
-  const cidades = await getCidades()
+  const cidades = (await getCidadeGrupos()).map((g) => g.label)
 
   return (
     <div>
