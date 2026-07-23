@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { createServerClient } from '@/lib/supabase/server'
 import AdminGestaoFicha from '@/components/AdminGestaoFicha'
 import type { Imovel } from '@/types/imovel'
-import type { ImovelGestao, ImovelConta } from '@/types/gestao'
+import type { ImovelGestao, ImovelConta, ImovelDocumento } from '@/types/gestao'
 
 export default async function GestaoFichaPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -15,6 +15,12 @@ export default async function GestaoFichaPage({ params }: { params: Promise<{ id
   const { data: ficha } = await supabase.from('imovel_gestao').select('*').eq('imovel_id', id).maybeSingle()
   const { data: contas } = await supabase
     .from('imovel_contas')
+    .select('*')
+    .eq('imovel_id', id)
+    .order('criado_em', { ascending: true })
+
+  const { data: documentos } = await supabase
+    .from('imovel_documentos')
     .select('*')
     .eq('imovel_id', id)
     .order('criado_em', { ascending: true })
@@ -37,6 +43,7 @@ export default async function GestaoFichaPage({ params }: { params: Promise<{ id
         imovel={imovel as Imovel}
         ficha={(ficha as ImovelGestao | null) ?? null}
         contasIniciais={(contas as ImovelConta[]) ?? []}
+        documentosIniciais={(documentos as ImovelDocumento[]) ?? []}
       />
     </div>
   )

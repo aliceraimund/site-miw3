@@ -23,6 +23,15 @@ export interface ImovelConta {
   criado_em: string
 }
 
+export interface ImovelDocumento {
+  id: string
+  imovel_id: string
+  storage_path: string
+  nome: string
+  tipo: string | null
+  criado_em: string
+}
+
 export const SITUACAO_GESTAO_LABELS: Record<SituacaoGestao, string> = {
   disponivel: 'Disponível',
   alugado: 'Alugado',
