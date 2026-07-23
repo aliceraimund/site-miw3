@@ -38,7 +38,7 @@ export default function AdminNav({ userEmail }: Props) {
             Anúncios
           </Link>
           <Link
-            href="/admin/gestao"
+            href="/admin/gestao/painel"
             className={`text-sm transition-colors ${isGestao ? 'text-white font-semibold' : 'text-slate-300 hover:text-white'}`}
           >
             Gestão

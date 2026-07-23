@@ -4,12 +4,14 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
 const ITENS = [
+  { href: '/admin/gestao/painel', label: 'Painel', match: (p: string) => p.startsWith('/admin/gestao/painel') },
   {
     href: '/admin/gestao',
     label: 'Imóveis',
     match: (p: string) =>
       p === '/admin/gestao' ||
       (p.startsWith('/admin/gestao/') &&
+        !p.startsWith('/admin/gestao/painel') &&
         !p.startsWith('/admin/gestao/inquilinos') &&
         !p.startsWith('/admin/gestao/contratos')),
   },
