@@ -46,17 +46,17 @@ export default function AdminManutencaoList({ manutencoes: initial }: Props) {
     setManutencoes((prev) =>
       prev.map((m) =>
         m.id === id
-          ? { ...m, status: novo, data_conclusao: novo === 'concluido' ? (m.data_conclusao ?? todayISO()) : m.data_conclusao }
+          ? { ...m, status: novo, data_conclusao_real: novo === 'concluido' ? (m.data_conclusao_real ?? todayISO()) : m.data_conclusao_real }
           : m
       )
     )
 
     const supabase = createClient()
-    const patch: { status: ManutencaoStatus; atualizado_em: string; data_conclusao?: string } = {
+    const patch: { status: ManutencaoStatus; atualizado_em: string; data_conclusao_real?: string } = {
       status: novo,
       atualizado_em: new Date().toISOString(),
     }
-    if (novo === 'concluido' && !atual.data_conclusao) patch.data_conclusao = todayISO()
+    if (novo === 'concluido' && !atual.data_conclusao_real) patch.data_conclusao_real = todayISO()
     await supabase.from('manutencoes').update(patch).eq('id', id)
   }
 
@@ -120,8 +120,8 @@ export default function AdminManutencaoList({ manutencoes: initial }: Props) {
                     {m.prestador && <p className="text-xs text-slate-400 truncate mt-0.5">{m.prestador}</p>}
                     <div className="flex items-center justify-between mt-2">
                       <span className="text-xs text-slate-400">{formatDate(m.data_abertura)}</span>
-                      {m.custo_referencia != null && (
-                        <span className="text-xs font-semibold text-slate-700">{formatCurrency(m.custo_referencia)}</span>
+                      {m.custo_estimado != null && (
+                        <span className="text-xs font-semibold text-slate-700">{formatCurrency(m.custo_estimado)}</span>
                       )}
                     </div>
                     <select

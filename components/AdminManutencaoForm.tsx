@@ -53,9 +53,9 @@ export default function AdminManutencaoForm({ manutencao, imoveis, fotosIniciais
   const [prestador, setPrestador] = useState(manutencao?.prestador ?? '')
   const [solicitante, setSolicitante] = useState(manutencao?.solicitante ?? '')
   const [status, setStatus] = useState<ManutencaoStatus>(manutencao?.status ?? 'aberto')
-  const [custo, setCusto] = useState(manutencao?.custo_referencia?.toString() ?? '')
+  const [custo, setCusto] = useState(manutencao?.custo_estimado?.toString() ?? '')
   const [dataAbertura, setDataAbertura] = useState(manutencao?.data_abertura ?? '')
-  const [dataConclusao, setDataConclusao] = useState(manutencao?.data_conclusao ?? '')
+  const [dataConclusao, setDataConclusao] = useState(manutencao?.data_conclusao_real ?? '')
 
   const [fotos, setFotos] = useState<FotoRow[]>(fotosIniciais)
   const [uploading, setUploading] = useState(false)
@@ -138,9 +138,9 @@ export default function AdminManutencaoForm({ manutencao, imoveis, fotosIniciais
       prestador: prestador.trim() || null,
       solicitante: solicitante.trim() || null,
       status,
-      custo_referencia: numOuNull(custo),
+      custo_estimado: numOuNull(custo),
       data_abertura: dataAbertura || new Date().toISOString().slice(0, 10),
-      data_conclusao: dataConclusao || null,
+      data_conclusao_real: dataConclusao || null,
       atualizado_em: new Date().toISOString(),
     }
 

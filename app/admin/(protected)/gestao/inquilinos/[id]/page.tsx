@@ -11,11 +11,10 @@ export default async function InquilinoEditarPage({ params }: { params: Promise<
   const { data: inquilino } = await supabase.from('inquilinos').select('*').eq('id', id).single()
   if (!inquilino) notFound()
 
-  const { data: documentos } = await supabase
-    .from('inquilino_documentos')
-    .select('*')
-    .eq('inquilino_id', id)
-    .order('criado_em', { ascending: true })
+  const [{ data: documentos }, { data: imoveis }] = await Promise.all([
+    supabase.from('inquilino_documentos').select('*').eq('inquilino_id', id).order('criado_em', { ascending: true }),
+    supabase.from('imoveis').select('id, nome').order('nome', { ascending: true }),
+  ])
 
   return (
     <div>
@@ -33,6 +32,7 @@ export default async function InquilinoEditarPage({ params }: { params: Promise<
       <AdminInquilinoForm
         inquilino={inquilino as Inquilino}
         documentosIniciais={(documentos as InquilinoDocumento[]) ?? []}
+        imoveis={imoveis ?? []}
       />
     </div>
   )

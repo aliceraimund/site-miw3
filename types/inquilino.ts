@@ -10,6 +10,7 @@ export interface Inquilino {
   email: string | null
   endereco: string | null
   observacoes: string | null
+  imovel_relacionado_id: string | null
   criado_em: string
 }
 

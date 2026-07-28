@@ -1,7 +1,11 @@
 import Link from 'next/link'
+import { createServerClient } from '@/lib/supabase/server'
 import AdminInquilinoForm from '@/components/AdminInquilinoForm'
 
-export default function InquilinoNovoPage() {
+export default async function InquilinoNovoPage() {
+  const supabase = await createServerClient()
+  const { data: imoveis } = await supabase.from('imoveis').select('id, nome').order('nome', { ascending: true })
+
   return (
     <div>
       <Link href="/admin/gestao/inquilinos" className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-slate-700 mb-4 transition-colors">
@@ -15,7 +19,7 @@ export default function InquilinoNovoPage() {
         <h1 className="text-2xl font-bold text-slate-900">Novo inquilino</h1>
       </div>
 
-      <AdminInquilinoForm />
+      <AdminInquilinoForm imoveis={imoveis ?? []} />
     </div>
   )
 }

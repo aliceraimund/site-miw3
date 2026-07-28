@@ -8,6 +8,7 @@ import { type Inquilino, type InquilinoDocumento, type TipoPessoa, TIPO_PESSOA_L
 interface Props {
   inquilino?: Inquilino
   documentosIniciais?: InquilinoDocumento[]
+  imoveis?: { id: string; nome: string }[]
 }
 
 interface DocRow extends InquilinoDocumento {
@@ -28,7 +29,7 @@ function Field({ label, required, children }: { label: string; required?: boolea
   )
 }
 
-export default function AdminInquilinoForm({ inquilino, documentosIniciais = [] }: Props) {
+export default function AdminInquilinoForm({ inquilino, documentosIniciais = [], imoveis = [] }: Props) {
   const router = useRouter()
   const isEditing = !!inquilino
   const docInputRef = useRef<HTMLInputElement>(null)
@@ -41,6 +42,7 @@ export default function AdminInquilinoForm({ inquilino, documentosIniciais = [] 
   const [email, setEmail] = useState(inquilino?.email ?? '')
   const [endereco, setEndereco] = useState(inquilino?.endereco ?? '')
   const [observacoes, setObservacoes] = useState(inquilino?.observacoes ?? '')
+  const [imovelRelacionado, setImovelRelacionado] = useState(inquilino?.imovel_relacionado_id ?? '')
 
   const [docs, setDocs] = useState<DocRow[]>(documentosIniciais)
   const [uploadingDoc, setUploadingDoc] = useState(false)
@@ -129,6 +131,7 @@ export default function AdminInquilinoForm({ inquilino, documentosIniciais = [] 
       email: email.trim() || null,
       endereco: endereco.trim() || null,
       observacoes: observacoes.trim() || null,
+      imovel_relacionado_id: imovelRelacionado || null,
     }
 
     if (isEditing) {
@@ -185,6 +188,16 @@ export default function AdminInquilinoForm({ inquilino, documentosIniciais = [] 
 
         <Field label="Endereço">
           <input value={endereco} onChange={(e) => setEndereco(e.target.value)} className={inputClass} placeholder="Endereço completo" />
+        </Field>
+
+        <Field label="Imóvel relacionado">
+          <select value={imovelRelacionado} onChange={(e) => setImovelRelacionado(e.target.value)} className={inputClass}>
+            <option value="">— nenhum —</option>
+            {imoveis.map((im) => (
+              <option key={im.id} value={im.id}>{im.nome}</option>
+            ))}
+          </select>
+          <p className="text-xs text-slate-400 mt-1">Informativo. O vínculo oficial de locação continua sendo o contrato.</p>
         </Field>
 
         <Field label="Observações">

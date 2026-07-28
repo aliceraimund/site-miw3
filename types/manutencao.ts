@@ -9,9 +9,12 @@ export interface Manutencao {
   prestador: string | null
   solicitante: string | null
   status: ManutencaoStatus
-  custo_referencia: number | null
+  custo_estimado: number | null
+  custo_real: number | null
   data_abertura: string
-  data_conclusao: string | null
+  data_inicio: string | null
+  data_conclusao_estimada: string | null
+  data_conclusao_real: string | null
   criado_em: string
   atualizado_em: string
 }
