@@ -1,13 +1,33 @@
 import Link from 'next/link'
 import { createServerClient } from '@/lib/supabase/server'
-import AdminContratoForm from '@/components/AdminContratoForm'
+import AdminContratoWizard from '@/components/AdminContratoWizard'
 
 export default async function ContratoNovoPage() {
   const supabase = await createServerClient()
-  const [{ data: imoveis }, { data: inquilinos }] = await Promise.all([
-    supabase.from('imoveis').select('id, nome, endereco_completo').order('nome', { ascending: true }),
-    supabase.from('inquilinos').select('id, nome').order('nome', { ascending: true }),
+
+  const [{ data: versoes }, { data: imoveis }, { data: inquilinos }] = await Promise.all([
+    supabase
+      .from('modelo_contrato_versoes')
+      .select('*, modelo:modelo_contratos(*)')
+      .eq('status', 'publicada')
+      .order('versao', { ascending: false }),
+    supabase
+      .from('imoveis')
+      .select('id, nome, endereco_completo, categoria, bairro, cidade, vagas, gestao:imovel_gestao(matricula, inscricao_municipal)')
+      .order('nome', { ascending: true }),
+    supabase
+      .from('inquilinos')
+      .select('id, nome, cpf_cnpj, rg, email, telefones, endereco')
+      .order('nome', { ascending: true }),
   ])
+
+  // Mantém apenas a maior versão publicada por modelo.
+  const porModelo = new Map<string, NonNullable<typeof versoes>[number]>()
+  for (const v of versoes ?? []) {
+    const key = (v as { modelo_id: string }).modelo_id
+    const atual = porModelo.get(key)
+    if (!atual || (v as { versao: number }).versao > (atual as { versao: number }).versao) porModelo.set(key, v)
+  }
 
   return (
     <div>
@@ -19,10 +39,12 @@ export default async function ContratoNovoPage() {
       </Link>
 
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-900">Novo contrato</h1>
+        <h1 className="text-2xl font-bold text-slate-900">Gerar contrato</h1>
+        <p className="text-slate-500 text-sm mt-0.5">A partir de um modelo publicado</p>
       </div>
 
-      <AdminContratoForm imoveis={imoveis ?? []} inquilinos={inquilinos ?? []} />
+      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+      <AdminContratoWizard versoes={[...porModelo.values()] as any} imoveis={(imoveis ?? []) as any} inquilinos={(inquilinos ?? []) as any} />
     </div>
   )
 }

@@ -26,8 +26,21 @@ export default async function ContratoEditarPage({ params }: { params: Promise<{
         Voltar para contratos
       </Link>
 
-      <div className="mb-6">
+      <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-slate-900">Contrato</h1>
+        {(contrato as Contrato).corpo_gerado && (
+          <a
+            href={`/admin/gestao/contratos/${id}/pdf`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 text-sm font-semibold text-slate-700 border border-slate-300 rounded-lg px-4 py-2 hover:bg-slate-50 transition-colors"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3M4 6a2 2 0 012-2h8l6 6v8a2 2 0 01-2 2H6a2 2 0 01-2-2V6z" />
+            </svg>
+            Baixar PDF
+          </a>
+        )}
       </div>
 
       <AdminContratoForm
