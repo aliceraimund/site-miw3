@@ -1,4 +1,5 @@
 import type { CategoriaEnum } from './imovel'
+import type { CorpoBlocos } from '@/lib/contrato/blocos'
 
 export type ModeloVersaoStatus = 'rascunho' | 'publicada' | 'arquivada'
 
@@ -10,11 +11,6 @@ export interface ModeloContrato {
   descricao: string | null
   ativo: boolean
   criado_em: string
-}
-
-// corpo_blocos: árvore de blocos (não HTML). Estrutura detalhada modelada na F1.
-export interface CorpoBlocos {
-  blocos: unknown[]
 }
 
 export interface ModeloContratoVersao {
