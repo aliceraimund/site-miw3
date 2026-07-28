@@ -1,5 +1,8 @@
 export type ContratoTipo = 'residencial' | 'comercial' | 'temporada'
-export type ContratoStatus = 'ativo' | 'encerrado' | 'renovado'
+// Novos rótulos (Pilota) + legados mantidos por compatibilidade.
+export type ContratoStatus = 'rascunho' | 'vigente' | 'rescindido' | 'ativo' | 'encerrado' | 'renovado'
+export type ModalidadeCobranca = 'pre_paga' | 'pos_paga'
+export type TituloCobranca = 'aluguel' | 'temporada' | 'prestacao_servico' | 'mensalidade'
 export type IndiceReajuste = 'igpm' | 'ipca' | 'incc' | 'outro' | 'nenhum'
 export type RegimePrimeiroMes = 'pro_rata' | 'integral' | 'carencia'
 export type TipoGarantia = 'fiador' | 'caucao' | 'titulo_capitalizacao' | 'seguro_fianca' | 'nenhuma'
@@ -22,7 +25,11 @@ export interface Contrato {
   // F0 — extensões
   modelo_versao_id: string | null
   valores_variaveis: Record<string, unknown> | null
-  corpo_gerado: Record<string, unknown> | null
+  corpo_gerado: Record<string, unknown> | null // legado (blocos resolvidos) — intacto
+  corpo_gerado_html: string | null // snapshot do documento em HTML
+  modalidade_cobranca: ModalidadeCobranca
+  titulo_cobranca: TituloCobranca
+  renovacao_automatica: boolean
   dia_vencimento_primeiro: string | null
   regime_primeiro_mes: RegimePrimeiroMes
   periodicidade_reajuste_meses: number | null
@@ -59,15 +66,33 @@ export const CONTRATO_TIPO_LABELS: Record<ContratoTipo, string> = {
 }
 
 export const CONTRATO_STATUS_LABELS: Record<ContratoStatus, string> = {
+  rascunho: 'Rascunho',
+  vigente: 'Vigente',
+  rescindido: 'Rescindido',
   ativo: 'Ativo',
   encerrado: 'Encerrado',
   renovado: 'Renovado',
 }
 
 export const CONTRATO_STATUS_COLORS: Record<ContratoStatus, string> = {
+  rascunho: 'bg-amber-100 text-amber-800',
+  vigente: 'bg-green-100 text-green-800',
+  rescindido: 'bg-red-100 text-red-800',
   ativo: 'bg-green-100 text-green-800',
   encerrado: 'bg-slate-100 text-slate-600',
   renovado: 'bg-blue-100 text-blue-800',
+}
+
+export const MODALIDADE_COBRANCA_LABELS: Record<ModalidadeCobranca, string> = {
+  pre_paga: 'Pré-paga',
+  pos_paga: 'Pós-paga',
+}
+
+export const TITULO_COBRANCA_LABELS: Record<TituloCobranca, string> = {
+  aluguel: 'Aluguel',
+  temporada: 'Temporada',
+  prestacao_servico: 'Prestação de serviço',
+  mensalidade: 'Mensalidade',
 }
 
 export const INDICE_REAJUSTE_LABELS: Record<IndiceReajuste, string> = {
@@ -88,6 +113,7 @@ export type TipoEvento =
   | 'reajuste_aplicado'
   | 'aditivo'
   | 'documento_gerado'
+  | 'anotacao_manual'
 
 export interface ContratoHistorico {
   id: string
@@ -110,6 +136,7 @@ export const TIPO_EVENTO_LABELS: Record<TipoEvento, string> = {
   reajuste_aplicado: 'Reajuste aplicado',
   aditivo: 'Aditivo',
   documento_gerado: 'Documento gerado',
+  anotacao_manual: 'Anotação',
 }
 
 export const TIPO_EVENTO_COLORS: Record<TipoEvento, string> = {
@@ -122,4 +149,5 @@ export const TIPO_EVENTO_COLORS: Record<TipoEvento, string> = {
   reajuste_aplicado: 'bg-green-100 text-green-800',
   aditivo: 'bg-blue-100 text-blue-800',
   documento_gerado: 'bg-slate-100 text-slate-600',
+  anotacao_manual: 'bg-purple-100 text-purple-800',
 }

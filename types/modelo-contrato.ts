@@ -13,11 +13,15 @@ export interface ModeloContrato {
   criado_em: string
 }
 
+export type FormatoVersao = 'html' | 'blocos'
+
 export interface ModeloContratoVersao {
   id: string
   modelo_id: string
   versao: number
-  corpo_blocos: CorpoBlocos
+  corpo_blocos: CorpoBlocos // legado (formato 'blocos') — mantido intacto
+  corpo_html: string | null // novo formato (editor de documento)
+  formato: FormatoVersao
   changelog: string | null
   status: ModeloVersaoStatus
   publicado_em: string | null
