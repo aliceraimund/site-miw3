@@ -25,9 +25,11 @@ export default function AdminModeloVersoes({ modeloId, versoes }: { modeloId: st
     // Clona o corpo da última versão como ponto de partida.
     const ultima = [...versoes].sort((a, b) => b.versao - a.versao)[0]
     const corpo = ultima?.corpo_blocos ?? { blocos: [] }
+    // Novas versões nascem em HTML; se a anterior era HTML, clona o documento.
+    const corpoHtml = ultima?.formato === 'html' ? (ultima.corpo_html ?? '') : ''
     const { data, error } = await supabase
       .from('modelo_contrato_versoes')
-      .insert({ modelo_id: modeloId, versao: maxVersao + 1, corpo_blocos: corpo, status: 'rascunho' })
+      .insert({ modelo_id: modeloId, versao: maxVersao + 1, corpo_blocos: corpo, corpo_html: corpoHtml, formato: 'html', status: 'rascunho' })
       .select('id')
       .single()
     setCriando(false)

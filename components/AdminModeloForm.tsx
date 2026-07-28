@@ -50,7 +50,7 @@ export default function AdminModeloForm() {
     // Já cria a versão 1 (rascunho, corpo vazio) para começar a editar.
     const { data: versao } = await supabase
       .from('modelo_contrato_versoes')
-      .insert({ modelo_id: modelo.id, versao: 1, corpo_blocos: { blocos: [] }, status: 'rascunho' })
+      .insert({ modelo_id: modelo.id, versao: 1, corpo_blocos: { blocos: [] }, corpo_html: '', formato: 'html', status: 'rascunho' })
       .select('id')
       .single()
 

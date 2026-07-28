@@ -5,7 +5,7 @@ import AdminContratoWizard from '@/components/AdminContratoWizard'
 export default async function ContratoNovoPage() {
   const supabase = await createServerClient()
 
-  const [{ data: versoes }, { data: imoveis }, { data: inquilinos }] = await Promise.all([
+  const [{ data: versoes }, { data: imoveis }, { data: inquilinos }, { data: tags }] = await Promise.all([
     supabase
       .from('modelo_contrato_versoes')
       .select('*, modelo:modelo_contratos(*)')
@@ -13,12 +13,13 @@ export default async function ContratoNovoPage() {
       .order('versao', { ascending: false }),
     supabase
       .from('imoveis')
-      .select('id, nome, endereco_completo, categoria, bairro, cidade, vagas, gestao:imovel_gestao(matricula, inscricao_municipal)')
+      .select('id, nome, tipo, endereco_completo, categoria, bairro, cidade, area_m2, quartos, suites, banheiros, vagas, gestao:imovel_gestao(matricula, inscricao_municipal, area_construida, area_terreno)')
       .order('nome', { ascending: true }),
     supabase
       .from('inquilinos')
-      .select('id, nome, cpf_cnpj, rg, email, telefones, endereco')
+      .select('id, nome, tipo_pessoa, cpf_cnpj, rg, email, telefones, endereco')
       .order('nome', { ascending: true }),
+    supabase.from('contrato_tags_sistema').select('*').order('grupo').order('ordem'),
   ])
 
   // Mantém apenas a maior versão publicada por modelo.
@@ -44,7 +45,7 @@ export default async function ContratoNovoPage() {
       </div>
 
       {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-      <AdminContratoWizard versoes={[...porModelo.values()] as any} imoveis={(imoveis ?? []) as any} inquilinos={(inquilinos ?? []) as any} />
+      <AdminContratoWizard versoes={[...porModelo.values()] as any} imoveis={(imoveis ?? []) as any} inquilinos={(inquilinos ?? []) as any} tags={(tags ?? []) as any} />
     </div>
   )
 }

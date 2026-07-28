@@ -9,6 +9,8 @@ import type { Bloco } from '@/lib/contrato/blocos'
 import { renderizarBlocos } from '@/lib/contrato/merge'
 import { montarValores, type ImovelParaContrato, type ParteMontagem } from '@/lib/contrato/montar-valores'
 import { pendenciasImovel, pendenciasParte } from '@/lib/contrato/cadastro-completo'
+import type { ContratoTagSistema } from '@/types/contrato-tag'
+import { montarDadosTags, preencherTagsSistema, verificarPendencias } from '@/lib/contrato/tags-sistema'
 
 type VersaoPublicada = ModeloContratoVersao & { modelo: ModeloContrato | null }
 type ImovelOpt = ImovelParaContrato & { id: string; nome: string; endereco_completo: string; categoria: string }
@@ -18,13 +20,15 @@ interface Props {
   versoes: VersaoPublicada[]
   imoveis: ImovelOpt[]
   inquilinos: InquilinoOpt[]
+  tags?: ContratoTagSistema[]
 }
 
 const PES_MAP_KEYS = new Set(['nome', 'cpf', 'cnpj', 'rg', 'email', 'telefone', 'endereco'])
 const inputClass = 'w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
-const PASSOS = ['Modelo', 'Imóvel', 'Partes', 'Variáveis', 'Preview']
+const PASSOS_BLOCOS = ['Modelo', 'Imóvel', 'Partes', 'Variáveis', 'Preview']
+const PASSOS_HTML = ['Modelo', 'Imóvel', 'Partes', 'Dados', 'Preview']
 
-export default function AdminContratoWizard({ versoes, imoveis, inquilinos }: Props) {
+export default function AdminContratoWizard({ versoes, imoveis, inquilinos, tags = [] }: Props) {
   const router = useRouter()
   const [passo, setPasso] = useState(0)
   const [versaoId, setVersaoId] = useState('')
@@ -38,9 +42,41 @@ export default function AdminContratoWizard({ versoes, imoveis, inquilinos }: Pr
   const [gerando, setGerando] = useState(false)
   const [erro, setErro] = useState('')
 
+  // Dados básicos do contrato (formato HTML — alimentam o registro e as tags)
+  const [dataInicio, setDataInicio] = useState('')
+  const [dataFim, setDataFim] = useState('')
+  const [valorAluguel, setValorAluguel] = useState('')
+  const [diaVencimento, setDiaVencimento] = useState('')
+
   const versao = versoes.find((v) => v.id === versaoId) ?? null
   const imovel = imoveis.find((i) => i.id === imovelId) ?? null
   const blocos = (versao?.corpo_blocos?.blocos as Bloco[]) ?? []
+  const ehHtml = versao ? versao.formato !== 'blocos' : true
+  const PASSOS = ehHtml ? PASSOS_HTML : PASSOS_BLOCOS
+
+  // Documento com as tags de sistema já preenchidas (formato HTML).
+  const htmlPreenchido = useMemo(() => {
+    if (!ehHtml || !versao?.corpo_html) return ''
+    const locatarios = locatarioIds.map((id) => inquilinos.find((i) => i.id === id)).filter(Boolean) as InquilinoOpt[]
+    const dados = montarDadosTags(tags, {
+      contrato: {
+        tipo: (versao.modelo?.categoria ?? 'residencial') === 'residencial' ? 'residencial' : 'comercial',
+        data_inicio: dataInicio, data_fim: dataFim,
+        valor_aluguel: valorAluguel ? Number(valorAluguel) : null,
+        dia_vencimento: diaVencimento ? Number(diaVencimento) : null,
+      },
+      imovel: imovel as Record<string, unknown> | null,
+      imovelGestao: (imovel?.gestao ?? null) as Record<string, unknown> | null,
+      inquilino: (locatarios[0] ?? null) as Record<string, unknown> | null,
+      locatarios,
+    })
+    return preencherTagsSistema(versao.corpo_html, dados)
+  }, [ehHtml, versao, tags, imovel, locatarioIds, inquilinos, dataInicio, dataFim, valorAluguel, diaVencimento])
+
+  const pendencias = useMemo(
+    () => (htmlPreenchido ? verificarPendencias(htmlPreenchido, tags.map((t) => t.chave)) : { preencher: [], desconhecidas: [] }),
+    [htmlPreenchido, tags]
+  )
 
   const escolherVersao = async (id: string) => {
     setVersaoId(id)
@@ -90,23 +126,29 @@ export default function AdminContratoWizard({ versoes, imoveis, inquilinos }: Pr
     setErro('')
     const supabase = createClient()
 
-    const resolvidos = renderizarBlocos(blocos, valores)
     const categoria = versao.modelo?.categoria ?? 'residencial'
     const tipo = categoria === 'residencial' ? 'residencial' : 'comercial'
-    const dataInicio = globalManual['prazo.dataInicio'] || new Date().toISOString().slice(0, 10)
+    const inicio = (ehHtml ? dataInicio : globalManual['prazo.dataInicio']) || new Date().toISOString().slice(0, 10)
+
+    // Contratos nascem como RASCUNHO — só vão a "vigente" após a verificação pré-voo.
+    const payload: Record<string, unknown> = {
+      imovel_id: imovel.id,
+      inquilino_id: locatarioIds[0],
+      tipo,
+      data_inicio: inicio,
+      status: 'rascunho',
+      modelo_versao_id: versao.id,
+      data_fim: ehHtml ? dataFim || null : null,
+      valor_aluguel: ehHtml && valorAluguel ? Number(valorAluguel) : null,
+      dia_vencimento: ehHtml && diaVencimento ? Number(diaVencimento) : null,
+      corpo_gerado_html: ehHtml ? htmlPreenchido : null,
+      valores_variaveis: ehHtml ? null : valores,
+      corpo_gerado: ehHtml ? null : { blocos: renderizarBlocos(blocos, valores) },
+    }
 
     const { data: contrato, error } = await supabase
       .from('contratos')
-      .insert({
-        imovel_id: imovel.id,
-        inquilino_id: locatarioIds[0],
-        tipo,
-        data_inicio: dataInicio,
-        status: 'ativo',
-        modelo_versao_id: versao.id,
-        valores_variaveis: valores,
-        corpo_gerado: { blocos: resolvidos },
-      })
+      .insert(payload)
       .select('id')
       .single()
 
@@ -125,9 +167,10 @@ export default function AdminContratoWizard({ versoes, imoveis, inquilinos }: Pr
 
     await supabase.from('contrato_historico').insert({ contrato_id: contrato.id, tipo_evento: 'documento_gerado', descricao: `Gerado a partir do modelo ${versao.modelo?.codigo ?? ''} v${versao.versao}` })
 
-    // Situação do imóvel coerente (gerido/alugado).
+    // Imóvel entra na gestão. A situação só vira "alugado" quando o contrato
+    // passa a vigente (o contrato nasce como rascunho).
     await supabase.from('imoveis').update({ gerido: true }).eq('id', imovel.id)
-    await supabase.from('imovel_gestao').upsert({ imovel_id: imovel.id, situacao_gestao: 'alugado' }, { onConflict: 'imovel_id' })
+    await supabase.from('imovel_gestao').upsert({ imovel_id: imovel.id }, { onConflict: 'imovel_id' })
 
     router.push(`/admin/gestao/contratos/${contrato.id}`)
   }
@@ -237,8 +280,36 @@ export default function AdminContratoWizard({ versoes, imoveis, inquilinos }: Pr
           </div>
         )}
 
-        {/* Passo 3 — Variáveis */}
-        {passo === 3 && (
+        {/* Passo 3 (HTML) — Dados do contrato */}
+        {passo === 3 && ehHtml && (
+          <div className="space-y-5">
+            <h2 className="font-semibold text-slate-900 text-base">Dados do contrato</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <label className="text-xs text-slate-500">
+                Início da vigência
+                <input type="date" value={dataInicio} onChange={(e) => setDataInicio(e.target.value)} className={inputClass} />
+              </label>
+              <label className="text-xs text-slate-500">
+                Fim da vigência
+                <input type="date" value={dataFim} onChange={(e) => setDataFim(e.target.value)} className={inputClass} />
+              </label>
+              <label className="text-xs text-slate-500">
+                Valor do aluguel (R$)
+                <input type="number" inputMode="decimal" value={valorAluguel} onChange={(e) => setValorAluguel(e.target.value)} className={inputClass} placeholder="0" />
+              </label>
+              <label className="text-xs text-slate-500">
+                Dia de vencimento
+                <input type="number" min={1} max={31} value={diaVencimento} onChange={(e) => setDiaVencimento(e.target.value)} className={inputClass} placeholder="Ex: 10" />
+              </label>
+            </div>
+            <p className="text-xs text-slate-400">
+              Estes dados preenchem as tags de contrato no documento. Os demais campos ficam disponíveis na ficha do contrato depois de gerado.
+            </p>
+          </div>
+        )}
+
+        {/* Passo 3 (blocos) — Variáveis */}
+        {passo === 3 && !ehHtml && (
           <div className="space-y-5">
             <h2 className="font-semibold text-slate-900 text-base">Preencha as variáveis</h2>
             {sufixosManuaisParte.length > 0 && locatarioIds.length > 0 && (
@@ -283,8 +354,19 @@ export default function AdminContratoWizard({ versoes, imoveis, inquilinos }: Pr
         {passo === 4 && (
           <div>
             <h2 className="font-semibold text-slate-900 text-base mb-3">Pré-visualização</h2>
+            {ehHtml && pendencias.preencher.length > 0 && (
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-800 mb-3">
+                <p className="font-semibold mb-1">Campos manuais pendentes ({pendencias.preencher.length}):</p>
+                <p className="text-xs">{pendencias.preencher.join('  ·  ')}</p>
+                <p className="text-xs mt-1">O contrato será criado como <strong>rascunho</strong>. Edite o documento na ficha do contrato e resolva estes campos antes de torná-lo vigente.</p>
+              </div>
+            )}
             <div className="border border-slate-200 rounded-lg p-6 max-h-[520px] overflow-y-auto">
-              <ContratoPreview blocos={blocos} valores={valores} />
+              {ehHtml ? (
+                <div className="doc-html text-sm text-slate-800 [&_h1]:text-center [&_h1]:font-bold [&_h1]:my-3 [&_h2]:font-bold [&_h2]:my-2 [&_p]:text-justify [&_p]:my-2 [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6" dangerouslySetInnerHTML={{ __html: htmlPreenchido }} />
+              ) : (
+                <ContratoPreview blocos={blocos} valores={valores} />
+              )}
             </div>
           </div>
         )}
