@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import BlocoEditor from '@/components/contrato/BlocoEditor'
+import DocumentoEditor from '@/components/contrato/DocumentoEditor'
 import VariaveisPanel from '@/components/contrato/VariaveisPanel'
 import ContratoPreview from '@/components/contrato/ContratoPreview'
 import type { ModeloContratoVersao, ModeloVariavel } from '@/types/modelo-contrato'
@@ -28,8 +29,10 @@ export default function AdminVersaoEditor({ modeloId, versao, variaveisIniciais 
   const [saved, setSaved] = useState(false)
   const [erros, setErros] = useState<ErroValidacao[]>([])
   const [msg, setMsg] = useState('')
+  const [modo, setModo] = useState<'documento' | 'blocos'>('documento')
 
   const chaves = useMemo(() => variaveis.map((v) => v.chave), [variaveis])
+  const varsOpt = useMemo(() => variaveis.map((v) => ({ chave: v.chave, label: v.label })), [variaveis])
 
   const salvarRascunho = async () => {
     setSaving(true)
@@ -83,9 +86,21 @@ export default function AdminVersaoEditor({ modeloId, versao, variaveisIniciais 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Editor de blocos */}
         <div className="lg:col-span-2 bg-slate-50 rounded-xl border border-slate-200 p-3">
-          <h3 className="text-sm font-semibold text-slate-700 mb-2">Corpo do contrato</h3>
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-sm font-semibold text-slate-700">Corpo do contrato</h3>
+            {editavel && (
+              <div className="flex items-center gap-1 text-xs">
+                <button type="button" onClick={() => setModo('documento')} className={`px-2 py-1 rounded ${modo === 'documento' ? 'bg-blue-600 text-white' : 'text-slate-500 hover:bg-slate-100'}`}>Documento</button>
+                <button type="button" onClick={() => setModo('blocos')} className={`px-2 py-1 rounded ${modo === 'blocos' ? 'bg-blue-600 text-white' : 'text-slate-500 hover:bg-slate-100'}`}>Blocos (avançado)</button>
+              </div>
+            )}
+          </div>
           {editavel ? (
-            <BlocoEditor blocos={blocos} variaveis={chaves} onChange={setBlocos} />
+            modo === 'documento' ? (
+              <DocumentoEditor key={`doc-${modo}`} blocos={blocos} variaveis={varsOpt} onChange={setBlocos} />
+            ) : (
+              <BlocoEditor blocos={blocos} variaveis={chaves} onChange={setBlocos} />
+            )
           ) : (
             <p className="text-xs text-slate-400">Somente leitura.</p>
           )}
