@@ -26,18 +26,48 @@ function todayISO() {
   const d = new Date()
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
+function mesCorrente() {
+  const d = new Date()
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+}
 
 export default function AdminManutencaoList({ manutencoes: initial }: Props) {
   const router = useRouter()
   const [manutencoes, setManutencoes] = useState(initial)
   const [dragId, setDragId] = useState<string | null>(null)
   const [overCol, setOverCol] = useState<ManutencaoStatus | null>(null)
+  const [filtroImovel, setFiltroImovel] = useState('')
+  const [mes, setMes] = useState(mesCorrente())
+
+  // Imóveis distintos presentes nos chamados (para o filtro).
+  const imoveisOpts = useMemo(() => {
+    const m = new Map<string, string>()
+    for (const c of manutencoes) if (c.imovel?.nome) m.set(c.imovel_id, c.imovel.nome)
+    return [...m.entries()].map(([id, nome]) => ({ id, nome })).sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
+  }, [manutencoes])
+
+  const filtradas = useMemo(
+    () => (filtroImovel ? manutencoes.filter((m) => m.imovel_id === filtroImovel) : manutencoes),
+    [manutencoes, filtroImovel]
+  )
 
   const porStatus = useMemo(() => {
     const mapa: Record<ManutencaoStatus, ManutencaoComImovel[]> = { aberto: [], em_andamento: [], concluido: [], cancelado: [] }
-    for (const m of manutencoes) mapa[m.status].push(m)
+    for (const m of filtradas) mapa[m.status].push(m)
     return mapa
-  }, [manutencoes])
+  }, [filtradas])
+
+  // Totais do mês selecionado (recalculados no cliente conforme os filtros).
+  const totais = useMemo(() => {
+    let estimado = 0
+    let real = 0
+    for (const m of filtradas) {
+      if (m.data_inicio?.startsWith(mes) && m.custo_estimado != null) estimado += m.custo_estimado
+      // custo_real ausente NÃO entra no total real
+      if (m.data_conclusao_real?.startsWith(mes) && m.custo_real != null) real += m.custo_real
+    }
+    return { estimado, real }
+  }, [filtradas, mes])
 
   const mover = async (id: string, novo: ManutencaoStatus) => {
     const atual = manutencoes.find((m) => m.id === id)
@@ -73,7 +103,20 @@ export default function AdminManutencaoList({ manutencoes: initial }: Props) {
 
   return (
     <div>
-      <p className="text-xs text-slate-400 mb-3">Arraste os cards entre as colunas para mudar o status — no celular, use o seletor no rodapé de cada card.</p>
+      <div className="flex flex-wrap items-end gap-3 mb-3">
+        <label className="text-xs text-slate-500">
+          Imóvel
+          <select value={filtroImovel} onChange={(e) => setFiltroImovel(e.target.value)} className="block mt-0.5 border border-slate-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="">Todos</option>
+            {imoveisOpts.map((i) => <option key={i.id} value={i.id}>{i.nome}</option>)}
+          </select>
+        </label>
+        <label className="text-xs text-slate-500">
+          Mês (para os totais)
+          <input type="month" value={mes} onChange={(e) => setMes(e.target.value)} className="block mt-0.5 border border-slate-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </label>
+        <p className="text-xs text-slate-400 ml-auto self-center">Arraste os cards entre as colunas para mudar o status — no celular, use o seletor no rodapé de cada card.</p>
+      </div>
       <div className="flex gap-4 overflow-x-auto pb-2">
         {COLUNAS.map((col) => {
           const cards = porStatus[col.key]
@@ -141,6 +184,20 @@ export default function AdminManutencaoList({ manutencoes: initial }: Props) {
             </div>
           )
         })}
+      </div>
+
+      {/* Rodapé de totais do mês selecionado */}
+      <div className="mt-4 bg-white rounded-xl border border-slate-200 p-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-8">
+        <div>
+          <p className="text-xs text-slate-500">Custo Total Estimado desse mês</p>
+          <p className="text-lg font-bold text-slate-900">{formatCurrency(totais.estimado)}</p>
+          <p className="text-[11px] text-slate-400">chamados com início em {mes}</p>
+        </div>
+        <div>
+          <p className="text-xs text-slate-500">Custo Total Real desse mês</p>
+          <p className="text-lg font-bold text-slate-900">{formatCurrency(totais.real)}</p>
+          <p className="text-[11px] text-slate-400">chamados concluídos em {mes} (só com custo real preenchido)</p>
+        </div>
       </div>
     </div>
   )

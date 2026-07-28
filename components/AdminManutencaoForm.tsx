@@ -54,8 +54,13 @@ export default function AdminManutencaoForm({ manutencao, imoveis, fotosIniciais
   const [solicitante, setSolicitante] = useState(manutencao?.solicitante ?? '')
   const [status, setStatus] = useState<ManutencaoStatus>(manutencao?.status ?? 'aberto')
   const [custo, setCusto] = useState(manutencao?.custo_estimado?.toString() ?? '')
+  const [custoReal, setCustoReal] = useState(manutencao?.custo_real?.toString() ?? '')
   const [dataAbertura, setDataAbertura] = useState(manutencao?.data_abertura ?? '')
+  const [dataInicio, setDataInicio] = useState(manutencao?.data_inicio ?? '')
+  const [dataConclusaoEstimada, setDataConclusaoEstimada] = useState(manutencao?.data_conclusao_estimada ?? '')
   const [dataConclusao, setDataConclusao] = useState(manutencao?.data_conclusao_real ?? '')
+
+  const atrasado = Boolean(dataConclusao && dataConclusaoEstimada && dataConclusao > dataConclusaoEstimada)
 
   const [fotos, setFotos] = useState<FotoRow[]>(fotosIniciais)
   const [uploading, setUploading] = useState(false)
@@ -126,6 +131,10 @@ export default function AdminManutencaoForm({ manutencao, imoveis, fotosIniciais
       setError('Selecione o imóvel e informe o título do chamado.')
       return
     }
+    if (dataInicio && dataConclusao && dataConclusao < dataInicio) {
+      setError('A data de conclusão real não pode ser anterior à data de início.')
+      return
+    }
     setSaving(true)
     setSaved(false)
     setError('')
@@ -139,7 +148,10 @@ export default function AdminManutencaoForm({ manutencao, imoveis, fotosIniciais
       solicitante: solicitante.trim() || null,
       status,
       custo_estimado: numOuNull(custo),
+      custo_real: numOuNull(custoReal),
       data_abertura: dataAbertura || new Date().toISOString().slice(0, 10),
+      data_inicio: dataInicio || null,
+      data_conclusao_estimada: dataConclusaoEstimada || null,
       data_conclusao_real: dataConclusao || null,
       atualizado_em: new Date().toISOString(),
     }
@@ -201,14 +213,30 @@ export default function AdminManutencaoForm({ manutencao, imoveis, fotosIniciais
               ))}
             </select>
           </Field>
-          <Field label="Custo (R$)">
+          <div />
+          <Field label="Custo estimado (R$)">
             <input type="number" inputMode="decimal" value={custo} onChange={(e) => setCusto(e.target.value)} className={inputClass} placeholder="0" />
+          </Field>
+          <Field label="Custo real (R$)">
+            <input type="number" inputMode="decimal" value={custoReal} onChange={(e) => setCustoReal(e.target.value)} className={inputClass} placeholder="preencher ao concluir" />
           </Field>
           <Field label="Data de abertura">
             <input type="date" value={dataAbertura} onChange={(e) => setDataAbertura(e.target.value)} className={inputClass} />
           </Field>
-          <Field label="Data de conclusão">
-            <input type="date" value={dataConclusao} onChange={(e) => setDataConclusao(e.target.value)} className={inputClass} />
+          <Field label="Data de início">
+            <input type="date" value={dataInicio} onChange={(e) => setDataInicio(e.target.value)} className={inputClass} />
+          </Field>
+          <Field label="Conclusão estimada">
+            <input type="date" value={dataConclusaoEstimada} onChange={(e) => setDataConclusaoEstimada(e.target.value)} className={inputClass} />
+          </Field>
+          <Field label="Conclusão real">
+            <input
+              type="date"
+              value={dataConclusao}
+              onChange={(e) => setDataConclusao(e.target.value)}
+              className={`${inputClass} ${atrasado ? 'border-red-400 text-red-700 ring-1 ring-red-300' : ''}`}
+            />
+            {atrasado && <p className="text-xs text-red-600 mt-1">Concluído após a data estimada (em atraso).</p>}
           </Field>
         </div>
       </div>
