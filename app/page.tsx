@@ -227,6 +227,18 @@ export default async function HomePage({
                 </div>
               ))}
             </div>
+
+            <div className="mt-6">
+              <a
+                href="/admin/login"
+                className="inline-flex items-center gap-2 border border-white/20 hover:border-white/40 text-slate-200 hover:text-white text-sm font-medium rounded-lg px-4 py-2 transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 11c0-1.105.895-2 2-2s2 .895 2 2v2H8v-2c0-1.105.895-2 2-2m2-6a4 4 0 100 8 4 4 0 000-8zM5 21h14a1 1 0 001-1v-5a2 2 0 00-2-2H6a2 2 0 00-2 2v5a1 1 0 001 1z" />
+                </svg>
+                Área administrativa
+              </a>
+            </div>
           </div>
 
           <div className="flex-shrink-0 flex items-center justify-start md:justify-end">
