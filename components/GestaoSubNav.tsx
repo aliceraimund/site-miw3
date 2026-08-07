@@ -13,10 +13,14 @@ const ITENS = [
       (p.startsWith('/admin/gestao/') &&
         !p.startsWith('/admin/gestao/painel') &&
         !p.startsWith('/admin/gestao/inquilinos') &&
-        !p.startsWith('/admin/gestao/contratos')),
+        !p.startsWith('/admin/gestao/contratos') &&
+        !p.startsWith('/admin/gestao/reajustes') &&
+        !p.startsWith('/admin/gestao/indices')),
   },
   { href: '/admin/gestao/inquilinos', label: 'Inquilinos', match: (p: string) => p.startsWith('/admin/gestao/inquilinos') },
   { href: '/admin/gestao/contratos', label: 'Contratos', match: (p: string) => p.startsWith('/admin/gestao/contratos') },
+  { href: '/admin/gestao/reajustes', label: 'Reajustes', match: (p: string) => p.startsWith('/admin/gestao/reajustes') },
+  { href: '/admin/gestao/indices', label: 'Índices', match: (p: string) => p.startsWith('/admin/gestao/indices') },
 ]
 
 export default function GestaoSubNav() {
