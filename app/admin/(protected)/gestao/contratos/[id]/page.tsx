@@ -1,21 +1,32 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { createServerClient } from '@/lib/supabase/server'
-import AdminContratoForm from '@/components/AdminContratoForm'
+import AdminContratoAbas from '@/components/AdminContratoAbas'
 import type { Contrato, ContratoHistorico } from '@/types/contrato'
+import type { ContratoTagSistema } from '@/types/contrato-tag'
+import type { ContratoOutroValor } from '@/types/contrato-outros-valores'
+import type { ContratoDocumento } from '@/components/contrato/AnexosPanel'
 
-export default async function ContratoEditarPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function ContratoDetalhePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const supabase = await createServerClient()
 
-  const [{ data: contrato }, { data: imoveis }, { data: inquilinos }, { data: historico }] = await Promise.all([
-    supabase.from('contratos').select('*').eq('id', id).single(),
-    supabase.from('imoveis').select('id, nome, endereco_completo').order('nome', { ascending: true }),
-    supabase.from('inquilinos').select('id, nome').order('nome', { ascending: true }),
-    supabase.from('contrato_historico').select('*').eq('contrato_id', id).order('criado_em', { ascending: false }),
-  ])
+  const { data: contrato } = await supabase
+    .from('contratos')
+    .select('*, imovel:imoveis(nome), inquilino:inquilinos(nome)')
+    .eq('id', id)
+    .single()
 
   if (!contrato) notFound()
+
+  const [{ data: tags }, { data: outros }, { data: historico }, { data: documentos }] = await Promise.all([
+    supabase.from('contrato_tags_sistema').select('*').order('grupo').order('ordem'),
+    supabase.from('contrato_outros_valores').select('*').eq('contrato_id', id).order('criado_em', { ascending: true }),
+    supabase.from('contrato_historico').select('*').eq('contrato_id', id).order('criado_em', { ascending: false }),
+    supabase.from('contrato_documentos').select('*').eq('contrato_id', id).order('criado_em', { ascending: true }),
+  ])
+
+  const c = contrato as Contrato & { imovel: { nome: string } | null; inquilino: { nome: string } | null }
 
   return (
     <div>
@@ -26,28 +37,19 @@ export default async function ContratoEditarPage({ params }: { params: Promise<{
         Voltar para contratos
       </Link>
 
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-slate-900">Contrato</h1>
-        {(contrato as Contrato).corpo_gerado && (
-          <a
-            href={`/admin/gestao/contratos/${id}/pdf`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 text-sm font-semibold text-slate-700 border border-slate-300 rounded-lg px-4 py-2 hover:bg-slate-50 transition-colors"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3M4 6a2 2 0 012-2h8l6 6v8a2 2 0 01-2 2H6a2 2 0 01-2-2V6z" />
-            </svg>
-            Baixar PDF
-          </a>
-        )}
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-slate-900">{c.imovel?.nome ?? 'Contrato'}</h1>
+        <p className="text-slate-500 text-sm mt-0.5">Locatário: {c.inquilino?.nome ?? '—'}</p>
       </div>
 
-      <AdminContratoForm
-        contrato={contrato as Contrato}
-        imoveis={imoveis ?? []}
-        inquilinos={inquilinos ?? []}
-        historicoInicial={(historico as ContratoHistorico[]) ?? []}
+      <AdminContratoAbas
+        contrato={c}
+        imovelNome={c.imovel?.nome ?? '—'}
+        inquilinoNome={c.inquilino?.nome ?? '—'}
+        tags={(tags as ContratoTagSistema[]) ?? []}
+        outrosValores={(outros as ContratoOutroValor[]) ?? []}
+        historico={(historico as ContratoHistorico[]) ?? []}
+        documentos={(documentos as ContratoDocumento[]) ?? []}
       />
     </div>
   )
