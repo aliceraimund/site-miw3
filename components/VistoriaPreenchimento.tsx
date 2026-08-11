@@ -3,6 +3,7 @@
 import { useRef, useState } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
+import { comprimirImagem } from '@/lib/imagem'
 import type { Vistoria, VistoriaItem, VistoriaFoto, EstadoItem, Medidores, ChaveEntregue, StatusVistoria } from '@/types/vistoria'
 import { ESTADO_LABELS, ESTADO_BUTTON_COLORS, TIPO_VISTORIA_LABELS, STATUS_VISTORIA_LABELS, STATUS_VISTORIA_COLORS } from '@/lib/utils'
 
@@ -401,7 +402,8 @@ export default function VistoriaPreenchimento({ vistoria, itensIniciais }: Props
     setSaveState('saving')
     let hadError = false
     for (let i = 0; i < files.length; i++) {
-      const file = files[i]
+      // Comprime no navegador: reduz ~85% do peso sem recortar a foto.
+      const file = await comprimirImagem(files[i])
       const ext = file.name.split('.').pop()?.toLowerCase() ?? 'jpg'
       const path = `${itemId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
 

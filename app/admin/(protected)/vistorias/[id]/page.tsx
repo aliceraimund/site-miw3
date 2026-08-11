@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import { createServerClient } from '@/lib/supabase/server'
 import VistoriaPreenchimento from '@/components/VistoriaPreenchimento'
+import ArquivamentoPanel from '@/components/vistoria/ArquivamentoPanel'
 import type { Vistoria, VistoriaItem } from '@/types/vistoria'
 
 export default async function VistoriaPage({ params }: { params: Promise<{ id: string }> }) {
@@ -21,5 +22,13 @@ export default async function VistoriaPage({ params }: { params: Promise<{ id: s
     .eq('vistoria_id', id)
     .order('ordem')
 
-  return <VistoriaPreenchimento vistoria={vistoria as Vistoria} itensIniciais={(itens ?? []) as VistoriaItem[]} />
+  const lista = (itens ?? []) as VistoriaItem[]
+  const totalFotos = lista.reduce((soma, it) => soma + (it.vistoria_fotos?.length ?? 0), 0)
+
+  return (
+    <div className="space-y-6">
+      <VistoriaPreenchimento vistoria={vistoria as Vistoria} itensIniciais={lista} />
+      <ArquivamentoPanel vistoria={vistoria as Vistoria} totalFotos={totalFotos} />
+    </div>
+  )
 }

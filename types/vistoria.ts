@@ -51,6 +51,8 @@ export interface Vistoria {
   status: StatusVistoria
   criado_em: string
   atualizado_em: string
+  laudo_url: string | null // PDF arquivado no Google Drive
+  fotos_liberadas_em: string | null // fotos removidas do storage
   imovel?: { nome: string; endereco: string } | null
 }
 

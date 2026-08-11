@@ -11,11 +11,13 @@ function chave(item: VistoriaItem) {
   return `${item.secao}__${item.item}__${item.ordem}`
 }
 
-function temMudanca(a: VistoriaItem | undefined, b: VistoriaItem | undefined) {
+// `compararFotos` fica falso quando uma das vistorias teve as fotos arquivadas:
+// sem isso, a diferença de quantidade marcaria TODO item como divergência.
+function temMudanca(a: VistoriaItem | undefined, b: VistoriaItem | undefined, compararFotos: boolean) {
   if (!a || !b) return true
   if (a.estado !== b.estado) return true
   if ((a.observacao ?? '') !== (b.observacao ?? '')) return true
-  if ((a.vistoria_fotos?.length ?? 0) !== (b.vistoria_fotos?.length ?? 0)) return true
+  if (compararFotos && (a.vistoria_fotos?.length ?? 0) !== (b.vistoria_fotos?.length ?? 0)) return true
   return false
 }
 
@@ -82,10 +84,13 @@ export default function ComparadorResultado({ vistoriaEntrada, vistoriaSaida, it
   const mapaSaida = new Map(itensSaida.map((i) => [chave(i), i]))
   const chaves = Array.from(new Set([...itensEntrada.map(chave), ...itensSaida.map(chave)]))
 
+  const arquivadas = [vistoriaEntrada, vistoriaSaida].filter((v) => v.fotos_liberadas_em)
+  const compararFotos = arquivadas.length === 0
+
   const linhas = chaves.map((k) => {
     const a = mapaEntrada.get(k)
     const b = mapaSaida.get(k)
-    return { k, a, b, mudou: temMudanca(a, b), piora: ehPiora(a, b) }
+    return { k, a, b, mudou: temMudanca(a, b, compararFotos), piora: ehPiora(a, b) }
   })
 
   const divergencias = linhas.filter((l) => l.mudou)
@@ -95,6 +100,25 @@ export default function ComparadorResultado({ vistoriaEntrada, vistoriaSaida, it
 
   return (
     <div className="space-y-6">
+      {arquivadas.length > 0 && (
+        <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-sm text-amber-800">
+          <p>
+            {arquivadas.length === 2
+              ? 'As fotos das duas vistorias foram arquivadas'
+              : `As fotos da vistoria de ${arquivadas[0] === vistoriaEntrada ? 'entrada' : 'saída'} foram arquivadas`}
+            {' '}— a comparação de estados e observações continua completa; as imagens estão nos laudos em PDF.
+          </p>
+          <div className="flex flex-wrap gap-3 mt-1">
+            {vistoriaEntrada.laudo_url && (
+              <a href={vistoriaEntrada.laudo_url} target="_blank" rel="noopener noreferrer" className="text-xs font-semibold underline">Laudo de entrada</a>
+            )}
+            {vistoriaSaida.laudo_url && (
+              <a href={vistoriaSaida.laudo_url} target="_blank" rel="noopener noreferrer" className="text-xs font-semibold underline">Laudo de saída</a>
+            )}
+          </div>
+        </div>
+      )}
+
       <div className="bg-white rounded-xl border border-slate-200 p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div className="grid grid-cols-2 gap-6">
           <div>
