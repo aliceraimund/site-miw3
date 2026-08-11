@@ -30,8 +30,13 @@ const styles = StyleSheet.create({
   itemNome: { fontSize: 10, fontWeight: 700 },
   estadoBadge: { fontSize: 8, fontWeight: 700, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 8, color: '#ffffff' },
   observacao: { fontSize: 9, color: '#334155', marginTop: 4 },
-  fotosRow: { flexDirection: 'row', marginTop: 4 },
-  foto: { width: 60, height: 60, objectFit: 'cover', borderRadius: 3, marginRight: 4 },
+  // Fotos: 2 por linha (~8,8 cm cada). Sem altura fixa e sem "cover" —
+  // a proporção original de cada foto é preservada.
+  fotosGrid: { flexDirection: 'row', flexWrap: 'wrap', marginTop: 6, marginHorizontal: -3 },
+  fotoWrap: { width: '50%', paddingHorizontal: 3, paddingBottom: 6 },
+  foto: { width: '100%', borderRadius: 3 },
+  fotoLegenda: { fontSize: 7, color: '#94a3b8', marginTop: 2 },
+  rodape: { position: 'absolute', bottom: 16, left: 32, right: 32, fontSize: 8, color: '#94a3b8', textAlign: 'center' },
   assinaturas: { marginTop: 30 },
   assinaturaLinha: { borderTopWidth: 1, borderTopColor: '#0f172a', marginTop: 28, paddingTop: 4, width: '100%' },
   assinaturaLabel: { fontSize: 9, color: '#334155' },
@@ -102,18 +107,27 @@ export default function LaudoDocument({ vistoria, itens, logoUrl }: Props) {
           <View key={secao}>
             <Text style={styles.secaoTitle}>{secao}</Text>
             {itens.filter((i) => i.secao === secao).map((item, idx) => (
-              <View key={idx} style={styles.itemBox} wrap={false}>
-                <View style={styles.itemRow}>
-                  <Text style={styles.itemNome}>{item.item}</Text>
-                  <Text style={[styles.estadoBadge, { backgroundColor: item.estado ? ESTADO_COR[item.estado] : '#94a3b8' }]}>
-                    {item.estado ? ESTADO_TXT[item.estado] : 'SEM ESTADO'}
-                  </Text>
+              <View key={idx} style={styles.itemBox}>
+                {/* Cabeçalho do item nunca é partido entre páginas */}
+                <View wrap={false}>
+                  <View style={styles.itemRow}>
+                    <Text style={styles.itemNome}>{item.item}</Text>
+                    <Text style={[styles.estadoBadge, { backgroundColor: item.estado ? ESTADO_COR[item.estado] : '#94a3b8' }]}>
+                      {item.estado ? ESTADO_TXT[item.estado] : 'SEM ESTADO'}
+                    </Text>
+                  </View>
+                  {item.observacao && <Text style={styles.observacao}>{item.observacao}</Text>}
                 </View>
-                {item.observacao && <Text style={styles.observacao}>{item.observacao}</Text>}
                 {item.fotos.length > 0 && (
-                  <View style={styles.fotosRow}>
+                  <View style={styles.fotosGrid}>
                     {item.fotos.map((url, i) => (
-                      <Image key={i} src={url} style={styles.foto} />
+                      // Cada foto é indivisível: não quebra no meio da página
+                      <View key={i} style={styles.fotoWrap} wrap={false}>
+                        <Image src={url} style={styles.foto} />
+                        {item.fotos.length > 1 && (
+                          <Text style={styles.fotoLegenda}>Foto {i + 1} de {item.fotos.length}</Text>
+                        )}
+                      </View>
                     ))}
                   </View>
                 )}
@@ -128,6 +142,8 @@ export default function LaudoDocument({ vistoria, itens, logoUrl }: Props) {
           <View style={styles.assinaturaLinha}><Text style={styles.assinaturaLabel}>Vistoriador</Text></View>
           <View style={styles.assinaturaLinha}><Text style={styles.assinaturaLabel}>Testemunha</Text></View>
         </View>
+
+        <Text style={styles.rodape} fixed render={({ pageNumber, totalPages }) => `${pageNumber} / ${totalPages}`} />
       </Page>
     </Document>
   )
