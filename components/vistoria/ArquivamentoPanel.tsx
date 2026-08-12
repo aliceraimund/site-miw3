@@ -9,11 +9,12 @@ import type { Vistoria } from '@/types/vistoria'
 interface Props {
   vistoria: Vistoria
   totalFotos: number
+  driveUrl?: string | null // atalho para a pasta do Drive
 }
 
 const inputClass = 'w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
 
-export default function ArquivamentoPanel({ vistoria, totalFotos }: Props) {
+export default function ArquivamentoPanel({ vistoria, totalFotos, driveUrl }: Props) {
   const router = useRouter()
   const [laudoUrl, setLaudoUrl] = useState(vistoria.laudo_url ?? '')
   const [liberadas, setLiberadas] = useState(vistoria.fotos_liberadas_em)
@@ -99,6 +100,16 @@ export default function ArquivamentoPanel({ vistoria, totalFotos }: Props) {
         >
           1. Gerar laudo PDF
         </a>
+        {driveUrl && (
+          <a
+            href={driveUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm font-semibold text-slate-700 border border-slate-300 rounded-lg px-4 py-2 hover:bg-slate-50"
+          >
+            Abrir pasta no Drive
+          </a>
+        )}
         <span className="text-xs text-slate-400">→ salve no Drive → cole o link abaixo</span>
       </div>
 

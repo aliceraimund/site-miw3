@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { createServerClient } from '@/lib/supabase/server'
 import AdminVistoriaList from '@/components/AdminVistoriaList'
 import AdminVistoriaFiltros from '@/components/AdminVistoriaFiltros'
+import DriveAtalho from '@/components/vistoria/DriveAtalho'
 import type { Vistoria, ImovelVistoria } from '@/types/vistoria'
 
 interface Props {
@@ -24,6 +25,11 @@ export default async function VistoriasPage({ searchParams }: Props) {
 
   const { data: vistorias } = await query
   const { data: imoveis } = await supabase.from('imoveis').select('id, nome, endereco:endereco_completo, categoria').order('nome')
+  const { data: cfgDrive } = await supabase
+    .from('configuracoes')
+    .select('valor')
+    .eq('chave', 'drive_vistorias_url')
+    .maybeSingle()
 
   return (
     <div>
@@ -33,6 +39,7 @@ export default async function VistoriasPage({ searchParams }: Props) {
           <p className="text-slate-500 text-sm mt-0.5">{vistorias?.length ?? 0} vistorias encontradas</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
+          <DriveAtalho chave="drive_vistorias_url" urlInicial={(cfgDrive?.valor as string | null) ?? null} rotulo="Pasta no Drive" />
           <Link
             href="/admin/vistorias/modelo-branco"
             className="text-sm text-slate-600 border border-slate-300 px-4 py-2 rounded-lg hover:bg-slate-50 transition-colors"

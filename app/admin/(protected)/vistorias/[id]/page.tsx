@@ -22,13 +22,23 @@ export default async function VistoriaPage({ params }: { params: Promise<{ id: s
     .eq('vistoria_id', id)
     .order('ordem')
 
+  const { data: cfgDrive } = await supabase
+    .from('configuracoes')
+    .select('valor')
+    .eq('chave', 'drive_vistorias_url')
+    .maybeSingle()
+
   const lista = (itens ?? []) as VistoriaItem[]
   const totalFotos = lista.reduce((soma, it) => soma + (it.vistoria_fotos?.length ?? 0), 0)
 
   return (
     <div className="space-y-6">
       <VistoriaPreenchimento vistoria={vistoria as Vistoria} itensIniciais={lista} />
-      <ArquivamentoPanel vistoria={vistoria as Vistoria} totalFotos={totalFotos} />
+      <ArquivamentoPanel
+        vistoria={vistoria as Vistoria}
+        totalFotos={totalFotos}
+        driveUrl={(cfgDrive?.valor as string | null) ?? null}
+      />
     </div>
   )
 }
