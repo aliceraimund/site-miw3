@@ -41,15 +41,26 @@ export default function ArquivamentoPanel({ vistoria, totalFotos, driveUrl }: Pr
     setLiberando(true); setMsg(''); setErro('')
     const supabase = createClient()
 
-    // 1) Todos os caminhos das fotos desta vistoria
-    const { data: fotos, error: erroBusca } = await supabase
-      .from('vistoria_fotos')
-      .select('id, storage_path, vistoria_item_id, vistoria_itens!inner(vistoria_id)')
-      .eq('vistoria_itens.vistoria_id', vistoria.id)
+    // 1) Fotos desta vistoria — tanto as de item quanto as gerais do ambiente
+    const [porItem, porAmbiente] = await Promise.all([
+      supabase
+        .from('vistoria_fotos')
+        .select('id, storage_path, vistoria_itens!inner(vistoria_id)')
+        .eq('vistoria_itens.vistoria_id', vistoria.id),
+      supabase
+        .from('vistoria_fotos')
+        .select('id, storage_path, vistoria_ambientes!inner(vistoria_id)')
+        .eq('vistoria_ambientes.vistoria_id', vistoria.id),
+    ])
 
-    if (erroBusca) { setErro(erroBusca.message); setLiberando(false); return }
+    if (porItem.error || porAmbiente.error) {
+      setErro((porItem.error ?? porAmbiente.error)!.message)
+      setLiberando(false)
+      return
+    }
 
-    const caminhos = (fotos ?? []).map((f) => (f as { storage_path: string }).storage_path).filter(Boolean)
+    const fotos = [...(porItem.data ?? []), ...(porAmbiente.data ?? [])]
+    const caminhos = fotos.map((f) => (f as { storage_path: string }).storage_path).filter(Boolean)
     if (caminhos.length === 0) {
       setErro('Nenhuma foto encontrada para liberar.')
       setLiberando(false)
@@ -63,7 +74,7 @@ export default function ArquivamentoPanel({ vistoria, totalFotos, driveUrl }: Pr
     }
 
     // 3) Remove os registros das fotos (os itens e estados PERMANECEM)
-    const ids = (fotos ?? []).map((f) => (f as { id: string }).id)
+    const ids = fotos.map((f) => (f as { id: string }).id)
     await supabase.from('vistoria_fotos').delete().in('id', ids)
 
     // 4) Marca a vistoria como arquivada

@@ -1,9 +1,17 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { type ImovelVistoria, type TipoVistoria, type ChaveEntregue, categoriaParaTipoVistoria } from '@/types/vistoria'
+import { type ImovelVistoria, type TipoVistoria, type ChaveEntregue, type VistoriaAmbienteTemplate, categoriaParaTipoVistoria } from '@/types/vistoria'
+
+// Ambiente escolhido para esta vistoria. `templateId` guarda de onde vêm os
+// itens; o nome é editável (ex.: "Dormitório 2" → "Quarto da frente").
+interface AmbienteEscolhido {
+  key: string
+  templateId: string
+  nome: string
+}
 
 const inputClass = 'w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
 
@@ -43,6 +51,36 @@ export default function AdminVistoriaNovaForm({ imoveis }: Props) {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
+  // Ambientes (cômodos) desta vistoria
+  const [templates, setTemplates] = useState<VistoriaAmbienteTemplate[]>([])
+  const [ambientes, setAmbientes] = useState<AmbienteEscolhido[]>([])
+  const [carregandoAmb, setCarregandoAmb] = useState(false)
+  const contador = useRef(0)
+  const novaKey = () => `a${contador.current++}`
+
+  // Ao escolher o imóvel, carrega os ambientes padrão do tipo correspondente.
+  const carregarAmbientes = async (idImovel: string) => {
+    const imovel = imoveis.find((i) => i.id === idImovel)
+    if (!imovel) return
+    setCarregandoAmb(true)
+    const supabase = createClient()
+    const { data } = await supabase
+      .from('vistoria_ambiente_templates')
+      .select('*')
+      .eq('tipo_imovel', categoriaParaTipoVistoria(imovel.categoria))
+      .eq('ativo', true)
+      .order('ordem')
+    const lista = (data as VistoriaAmbienteTemplate[]) ?? []
+    setTemplates(lista)
+    setAmbientes(lista.filter((t) => t.padrao).map((t) => ({ key: novaKey(), templateId: t.id, nome: t.nome })))
+    setCarregandoAmb(false)
+  }
+
+  const renomear = (key: string, nome: string) => setAmbientes((prev) => prev.map((a) => (a.key === key ? { ...a, nome } : a)))
+  const remover = (key: string) => setAmbientes((prev) => prev.filter((a) => a.key !== key))
+  const duplicar = (templateId: string, nome: string) =>
+    setAmbientes((prev) => [...prev, { key: novaKey(), templateId, nome }])
+
   const addChave = () => setChaves((prev) => [...prev, { descricao: '', quantidade: 1 }])
   const updateChave = (i: number, patch: Partial<ChaveEntregue>) =>
     setChaves((prev) => prev.map((c, j) => (j === i ? { ...c, ...patch } : c)))
@@ -52,6 +90,10 @@ export default function AdminVistoriaNovaForm({ imoveis }: Props) {
     e.preventDefault()
     if (!imovelId) {
       setError('Selecione um imóvel.')
+      return
+    }
+    if (ambientes.length === 0) {
+      setError('Selecione ao menos um ambiente para vistoriar.')
       return
     }
     setSaving(true)
@@ -85,10 +127,23 @@ export default function AdminVistoriaNovaForm({ imoveis }: Props) {
       return
     }
 
-    const { data: templates, error: templatesError } = await supabase
+    // Cria os ambientes escolhidos, na ordem em que aparecem na tela.
+    const { data: ambientesCriados, error: ambError } = await supabase
+      .from('vistoria_ambientes')
+      .insert(ambientes.map((a, idx) => ({ vistoria_id: vistoria.id, nome: a.nome.trim() || 'Ambiente', ordem: idx })))
+      .select('*')
+
+    if (ambError || !ambientesCriados) {
+      setError(ambError?.message ?? 'Erro ao criar os ambientes')
+      setSaving(false)
+      return
+    }
+
+    // Itens de cada ambiente, copiados do template de origem.
+    const { data: templatesItens, error: templatesError } = await supabase
       .from('vistoria_checklist_templates')
       .select('*')
-      .eq('tipo_imovel', categoriaParaTipoVistoria(imovel.categoria))
+      .in('ambiente_template_id', [...new Set(ambientes.map((a) => a.templateId))])
       .eq('ativo', true)
       .order('ordem')
 
@@ -98,14 +153,21 @@ export default function AdminVistoriaNovaForm({ imoveis }: Props) {
       return
     }
 
-    if (templates && templates.length > 0) {
-      const itens = templates.map((t) => ({
-        vistoria_id: vistoria.id,
-        template_item_id: t.id,
-        secao: t.secao,
-        item: t.item,
-        ordem: t.ordem,
-      }))
+    const itens = ambientes.flatMap((a, idx) => {
+      const criado = ambientesCriados[idx] as { id: string; nome: string }
+      return (templatesItens ?? [])
+        .filter((t) => t.ambiente_template_id === a.templateId)
+        .map((t) => ({
+          vistoria_id: vistoria.id,
+          ambiente_id: criado.id,
+          template_item_id: t.id,
+          secao: criado.nome, // nome do ambiente no momento da criação
+          item: t.item,
+          ordem: t.ordem,
+        }))
+    })
+
+    if (itens.length > 0) {
       const { error: itensError } = await supabase.from('vistoria_itens').insert(itens)
       if (itensError) {
         setError(itensError.message)
@@ -127,7 +189,7 @@ export default function AdminVistoriaNovaForm({ imoveis }: Props) {
         <h2 className="font-semibold text-slate-900 text-base border-b border-slate-100 pb-3">Imóvel e tipo</h2>
 
         <Field label="Imóvel" required>
-          <select value={imovelId} onChange={(e) => setImovelId(e.target.value)} className={inputClass}>
+          <select value={imovelId} onChange={(e) => { setImovelId(e.target.value); carregarAmbientes(e.target.value) }} className={inputClass}>
             <option value="">Selecione...</option>
             {imoveis.map((i) => (
               <option key={i.id} value={i.id}>{i.nome} — {i.endereco}</option>
@@ -173,6 +235,65 @@ export default function AdminVistoriaNovaForm({ imoveis }: Props) {
             <input type="text" value={locatario} onChange={(e) => setLocatario(e.target.value)} className={inputClass} placeholder="Nome do locatário" />
           </Field>
         </div>
+      </div>
+
+      {/* Ambientes a vistoriar */}
+      <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-4">
+        <div className="border-b border-slate-100 pb-3">
+          <h2 className="font-semibold text-slate-900 text-base">Ambientes a vistoriar</h2>
+          <p className="text-xs text-slate-400 mt-0.5">
+            A vistoria é feita cômodo a cômodo. Ajuste a lista conforme o imóvel — dá para renomear, remover e adicionar.
+          </p>
+        </div>
+
+        {!imovelId ? (
+          <p className="text-sm text-slate-400">Selecione o imóvel para carregar os ambientes.</p>
+        ) : carregandoAmb ? (
+          <p className="text-sm text-slate-400">Carregando ambientes...</p>
+        ) : (
+          <>
+            {ambientes.length === 0 ? (
+              <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-2">
+                Nenhum ambiente selecionado — escolha ao menos um abaixo.
+              </p>
+            ) : (
+              <ol className="space-y-2">
+                {ambientes.map((a, idx) => (
+                  <li key={a.key} className="flex items-center gap-2">
+                    <span className="w-6 h-6 shrink-0 rounded-full bg-slate-100 text-slate-500 text-xs flex items-center justify-center">{idx + 1}</span>
+                    <input
+                      value={a.nome}
+                      onChange={(e) => renomear(a.key, e.target.value)}
+                      className="flex-1 border border-slate-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <button type="button" onClick={() => duplicar(a.templateId, `${a.nome} (2)`)} title="Duplicar este ambiente" className="text-slate-400 hover:text-blue-600 px-2 text-sm">
+                      ⧉
+                    </button>
+                    <button type="button" onClick={() => remover(a.key)} title="Remover" className="text-slate-400 hover:text-red-600 px-2">
+                      ✕
+                    </button>
+                  </li>
+                ))}
+              </ol>
+            )}
+
+            <div className="border-t border-slate-100 pt-3">
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-2">Adicionar ambiente</p>
+              <div className="flex flex-wrap gap-1.5">
+                {templates.map((t) => (
+                  <button
+                    key={t.id}
+                    type="button"
+                    onClick={() => duplicar(t.id, t.nome)}
+                    className="text-xs border border-slate-200 text-slate-600 rounded-lg px-2.5 py-1 hover:bg-slate-50 hover:border-slate-300"
+                  >
+                    + {t.nome}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
       </div>
 
       <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-5">

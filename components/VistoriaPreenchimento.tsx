@@ -4,7 +4,8 @@ import { useRef, useState } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { comprimirImagem } from '@/lib/imagem'
-import type { Vistoria, VistoriaItem, VistoriaFoto, EstadoItem, Medidores, ChaveEntregue, StatusVistoria } from '@/types/vistoria'
+import AmbientePanel from '@/components/vistoria/AmbientePanel'
+import type { Vistoria, VistoriaItem, VistoriaFoto, VistoriaAmbiente, EstadoItem, Medidores, ChaveEntregue, StatusVistoria } from '@/types/vistoria'
 import { ESTADO_LABELS, ESTADO_BUTTON_COLORS, TIPO_VISTORIA_LABELS, STATUS_VISTORIA_LABELS, STATUS_VISTORIA_COLORS } from '@/lib/utils'
 
 const ESTADOS: EstadoItem[] = ['nova', 'boa', 'regular', 'danificada', 'nz']
@@ -363,17 +364,23 @@ function HeaderFields({ vistoria, onSave }: { vistoria: Vistoria; onSave: (patch
 interface Props {
   vistoria: Vistoria
   itensIniciais: VistoriaItem[]
+  ambientesIniciais?: VistoriaAmbiente[]
 }
 
-export default function VistoriaPreenchimento({ vistoria, itensIniciais }: Props) {
+export default function VistoriaPreenchimento({ vistoria, itensIniciais, ambientesIniciais = [] }: Props) {
   const [itens, setItens] = useState(itensIniciais)
+  const [ambientes, setAmbientes] = useState(ambientesIniciais)
   const [status, setStatus] = useState<StatusVistoria>(vistoria.status)
   const [activeSecao, setActiveSecao] = useState<string>(itensIniciais[0]?.secao ?? '')
   const [saveState, setSaveState] = useState<SaveState>('idle')
   const [showPendentes, setShowPendentes] = useState(false)
   const observacaoTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({})
 
-  const secoes = Array.from(new Set(itens.map((i) => i.secao)))
+  // Vistorias novas navegam pela ordem dos ambientes; as antigas, pela seção.
+  const secoes = ambientes.length > 0
+    ? ambientes.map((a) => a.nome)
+    : Array.from(new Set(itens.map((i) => i.secao)))
+  const ambienteAtivo = ambientes.find((a) => a.nome === activeSecao) ?? null
   const itensAtivos = itens.filter((i) => i.secao === activeSecao)
   const totalPreenchidos = itens.filter((i) => i.estado).length
   const pendentes = itens.filter((i) => !i.estado)
@@ -526,6 +533,28 @@ export default function VistoriaPreenchimento({ vistoria, itensIniciais }: Props
           })}
         </div>
       </div>
+
+      {ambienteAtivo && (
+        <div className="mb-3">
+          <AmbientePanel
+            key={ambienteAtivo.id}
+            ambiente={ambienteAtivo}
+            onRenomear={(id, nome) => {
+              setAmbientes((prev) => prev.map((a) => (a.id === id ? { ...a, nome } : a)))
+              setItens((prev) => prev.map((i) => (i.ambiente_id === id ? { ...i, secao: nome } : i)))
+              setActiveSecao(nome)
+            }}
+            onRemover={async (id) => {
+              const supabase = createClient()
+              await supabase.from('vistoria_ambientes').delete().eq('id', id)
+              const restantes = ambientes.filter((a) => a.id !== id)
+              setAmbientes(restantes)
+              setItens((prev) => prev.filter((i) => i.ambiente_id !== id))
+              setActiveSecao(restantes[0]?.nome ?? '')
+            }}
+          />
+        </div>
+      )}
 
       <div className="space-y-3">
         {itensAtivos.map((item) => (
