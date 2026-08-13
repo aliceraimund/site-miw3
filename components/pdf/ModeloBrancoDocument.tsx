@@ -23,14 +23,15 @@ const styles = StyleSheet.create({
   infoBoxFull: { width: '100%', marginBottom: 10 },
   infoLabel: { fontSize: 8, color: '#64748b', textTransform: 'uppercase', marginBottom: 3 },
   infoLine: { borderBottomWidth: 1, borderBottomColor: '#0f172a', height: 14 },
-  secaoTitle: { fontSize: 11, fontWeight: 700, marginTop: 14, marginBottom: 6, textTransform: 'uppercase', color: '#1e293b' },
+  ambienteHeader: { backgroundColor: '#0f172a', borderRadius: 4, paddingVertical: 5, paddingHorizontal: 8, marginTop: 14, marginBottom: 6 },
+  ambienteNome: { fontSize: 11, fontWeight: 700, color: '#ffffff', textTransform: 'uppercase' },
   itemBox: { borderWidth: 1, borderColor: '#e2e8f0', borderRadius: 4, padding: 8, marginBottom: 6 },
   itemRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
-  itemNome: { fontSize: 10, fontWeight: 700 },
-  checkRow: { flexDirection: 'row' },
-  checkOption: { flexDirection: 'row', alignItems: 'center', marginLeft: 10 },
+  itemNome: { fontSize: 10, fontWeight: 700, flex: 1, paddingRight: 6 },
+  checkRow: { flexDirection: 'row', flexShrink: 0 },
+  checkOption: { flexDirection: 'row', alignItems: 'center', marginLeft: 7 },
   checkBox: { width: 9, height: 9, borderWidth: 1, borderColor: '#0f172a', marginRight: 3 },
-  checkLabel: { fontSize: 8, color: '#334155' },
+  checkLabel: { fontSize: 7, color: '#334155' },
   obsLabel: { fontSize: 8, color: '#64748b', marginBottom: 2 },
   obsLine: { borderBottomWidth: 1, borderBottomColor: '#cbd5e1', height: 12 },
   assinaturas: { marginTop: 30 },
@@ -38,7 +39,7 @@ const styles = StyleSheet.create({
   assinaturaLabel: { fontSize: 9, color: '#334155' },
 })
 
-const OPCOES_ESTADO = ['Bom', 'Regular', 'Avaria', 'N/A']
+const OPCOES_ESTADO = ['Nova', 'Boa', 'Regular', 'Danificada', 'N/Z']
 
 interface Props {
   tipoImovel: TipoImovelVistoria
@@ -102,7 +103,9 @@ export default function ModeloBrancoDocument({ tipoImovel, itens, logoUrl }: Pro
 
         {secoes.map((secao) => (
           <View key={secao}>
-            <Text style={styles.secaoTitle}>{secao}</Text>
+            <View style={styles.ambienteHeader} wrap={false}>
+              <Text style={styles.ambienteNome}>{secao}</Text>
+            </View>
             {itens.filter((i) => i.secao === secao).map((item, idx) => (
               <View key={idx} style={styles.itemBox} wrap={false}>
                 <View style={styles.itemRow}>

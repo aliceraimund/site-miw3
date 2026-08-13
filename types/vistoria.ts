@@ -26,6 +26,7 @@ export interface ChecklistTemplateItem {
   ordem: number
   ativo: boolean
   criado_em: string
+  ambiente_template_id: string | null // nulo no checklist antigo, por sistema
 }
 
 export interface Medidores {
