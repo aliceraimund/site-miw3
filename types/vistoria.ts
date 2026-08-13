@@ -1,7 +1,8 @@
 export type TipoImovelVistoria = 'residencial' | 'comercial'
 export type TipoVistoria = 'entrada' | 'saida'
 export type StatusVistoria = 'rascunho' | 'concluida'
-export type EstadoItem = 'bom' | 'regular' | 'avaria' | 'na'
+export type EstadoItem = 'nova' | 'boa' | 'regular' | 'danificada' | 'nz'
+export const ESTADOS_ITEM: EstadoItem[] = ['nova', 'boa', 'regular', 'danificada', 'nz']
 
 // Opção de imóvel para a vistoria — agora vinda do cadastro unificado (tabela imoveis).
 export interface ImovelVistoria {
@@ -60,7 +61,8 @@ export interface VistoriaItem {
   id: string
   vistoria_id: string
   template_item_id: string | null
-  secao: string
+  ambiente_id: string | null // ambiente (cômodo) a que o item pertence
+  secao: string // nome do ambiente no momento da criação (histórico)
   item: string
   ordem: number
   estado: EstadoItem | null
@@ -72,8 +74,30 @@ export interface VistoriaItem {
 
 export interface VistoriaFoto {
   id: string
-  vistoria_item_id: string
+  vistoria_item_id: string | null // nulo quando a foto é do ambiente
+  vistoria_ambiente_id: string | null
   storage_path: string
   legenda: string | null
   criado_em: string
+}
+
+// Ambiente padrão sugerido por tipo de imóvel (`padrao` = pré-marcado ao criar).
+export interface VistoriaAmbienteTemplate {
+  id: string
+  tipo_imovel: TipoImovelVistoria
+  nome: string
+  ordem: number
+  padrao: boolean
+  ativo: boolean
+}
+
+// Ambiente DAQUELA vistoria — editável (renomear, adicionar, remover).
+export interface VistoriaAmbiente {
+  id: string
+  vistoria_id: string
+  nome: string
+  ordem: number
+  observacao: string | null
+  criado_em: string
+  vistoria_fotos?: VistoriaFoto[] // fotos gerais do ambiente
 }

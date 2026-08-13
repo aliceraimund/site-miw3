@@ -76,24 +76,27 @@ export const STATUS_VISTORIA_COLORS: Record<string, string> = {
 }
 
 export const ESTADO_LABELS: Record<string, string> = {
-  bom: 'Bom',
+  nova: 'Nova',
+  boa: 'Boa',
   regular: 'Regular',
-  avaria: 'Avaria',
-  na: 'N/A',
+  danificada: 'Danificada',
+  nz: 'N/Z',
 }
 
 export const ESTADO_COLORS: Record<string, string> = {
-  bom: 'bg-green-100 text-green-800',
+  nova: 'bg-emerald-100 text-emerald-800',
+  boa: 'bg-green-100 text-green-800',
   regular: 'bg-amber-100 text-amber-800',
-  avaria: 'bg-red-100 text-red-800',
-  na: 'bg-slate-100 text-slate-600',
+  danificada: 'bg-red-100 text-red-800',
+  nz: 'bg-slate-100 text-slate-600',
 }
 
 export const ESTADO_BUTTON_COLORS: Record<string, string> = {
-  bom: 'bg-green-600 border-green-600 text-white',
+  nova: 'bg-emerald-600 border-emerald-600 text-white',
+  boa: 'bg-green-600 border-green-600 text-white',
   regular: 'bg-amber-500 border-amber-500 text-white',
-  avaria: 'bg-red-600 border-red-600 text-white',
-  na: 'bg-slate-500 border-slate-500 text-white',
+  danificada: 'bg-red-600 border-red-600 text-white',
+  nz: 'bg-slate-500 border-slate-500 text-white',
 }
 
 export function formatDate(value: string): string {

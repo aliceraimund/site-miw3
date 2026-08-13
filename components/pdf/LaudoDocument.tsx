@@ -9,8 +9,8 @@ export interface LaudoItemPdf {
   fotos: string[]
 }
 
-const ESTADO_COR: Record<string, string> = { bom: '#16a34a', regular: '#d97706', avaria: '#dc2626', na: '#64748b' }
-const ESTADO_TXT: Record<string, string> = { bom: 'BOM', regular: 'REGULAR', avaria: 'AVARIA', na: 'N/A' }
+const ESTADO_COR: Record<string, string> = { nova: '#059669', boa: '#16a34a', regular: '#d97706', danificada: '#dc2626', nz: '#64748b' }
+const ESTADO_TXT: Record<string, string> = { nova: 'NOVA', boa: 'BOA', regular: 'REGULAR', danificada: 'DANIFICADA', nz: 'N/Z' }
 
 const styles = StyleSheet.create({
   page: { padding: 32, fontSize: 10, fontFamily: 'Helvetica', color: '#0f172a' },

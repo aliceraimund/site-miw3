@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import type { Vistoria, VistoriaItem, VistoriaFoto, EstadoItem } from '@/types/vistoria'
 import { ESTADO_LABELS, ESTADO_COLORS, TIPO_VISTORIA_LABELS, formatDate } from '@/lib/utils'
 
-const RANK: Record<string, number> = { bom: 0, regular: 1, avaria: 2 }
+const RANK: Record<string, number> = { nova: 0, boa: 1, regular: 2, danificada: 3 }
 
 function chave(item: VistoriaItem) {
   return `${item.secao}__${item.item}__${item.ordem}`

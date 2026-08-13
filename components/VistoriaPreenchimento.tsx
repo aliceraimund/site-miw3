@@ -7,7 +7,7 @@ import { comprimirImagem } from '@/lib/imagem'
 import type { Vistoria, VistoriaItem, VistoriaFoto, EstadoItem, Medidores, ChaveEntregue, StatusVistoria } from '@/types/vistoria'
 import { ESTADO_LABELS, ESTADO_BUTTON_COLORS, TIPO_VISTORIA_LABELS, STATUS_VISTORIA_LABELS, STATUS_VISTORIA_COLORS } from '@/lib/utils'
 
-const ESTADOS: EstadoItem[] = ['bom', 'regular', 'avaria', 'na']
+const ESTADOS: EstadoItem[] = ['nova', 'boa', 'regular', 'danificada', 'nz']
 const inputClass = 'w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
 const nowISO = () => new Date().toISOString()
 
@@ -134,7 +134,7 @@ function ItemCard({ item, onSetEstado, onObservacaoChange, onAddFotos, onRemoveF
     <div className="bg-white rounded-xl border border-slate-200 p-4 space-y-3">
       <p className="font-medium text-slate-900 text-sm">{item.item}</p>
 
-      <div className="grid grid-cols-4 gap-2">
+      <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
         {ESTADOS.map((estado) => (
           <button
             key={estado}
