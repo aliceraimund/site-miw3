@@ -15,12 +15,20 @@ export function formatArea(value: number): string {
 // mantendo conectores (de, do, da...) em minúsculo (exceto na primeira palavra).
 const CONECTORES_TITULO = new Set(['de', 'do', 'da', 'dos', 'das', 'e', 'a', 'o', 'com', 'em', 'para'])
 
+// Siglas de estado só voltam a maiúsculas quando vêm depois de vírgula ou traço
+// ("Diadema, SP"), para não transformar palavras comuns como "se" em sigla.
+const UFS = new Set(['ac', 'al', 'ap', 'am', 'ba', 'ce', 'df', 'es', 'go', 'ma', 'mt', 'ms', 'mg', 'pa', 'pb', 'pr', 'pe', 'pi', 'rj', 'rn', 'ro', 'rr', 'rs', 'sc', 'se', 'sp', 'to'])
+
 export function formatTitulo(texto: string): string {
   const tokens = texto.toLowerCase().split(/(\s+)/)
   let primeira = true
+  let anterior = '' // última palavra vista, para detectar ", sp" e "- sp"
   return tokens
     .map((tok) => {
       if (tok.trim() === '') return tok
+      const apos = anterior.endsWith(',') || anterior === '-' || anterior === '—'
+      anterior = tok
+      if (apos && UFS.has(tok)) return tok.toUpperCase()
       const ehConector = CONECTORES_TITULO.has(tok)
       if (ehConector && !primeira) return tok
       primeira = false

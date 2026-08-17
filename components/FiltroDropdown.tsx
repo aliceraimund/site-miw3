@@ -13,11 +13,10 @@ interface Props {
   valor: string
   onSelect: (key: string) => void
   icone: React.ReactNode
-  destaque?: boolean // filtro principal — botão sólido, mais forte que os demais
 }
 
 // Filtro em dropdown: botão "Rótulo: valor" que abre a lista de opções.
-export default function FiltroDropdown({ label, opcoes, valor, onSelect, icone, destaque = false }: Props) {
+export default function FiltroDropdown({ label, opcoes, valor, onSelect, icone }: Props) {
   const [aberto, setAberto] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
@@ -48,17 +47,15 @@ export default function FiltroDropdown({ label, opcoes, valor, onSelect, icone, 
         aria-expanded={aberto}
         aria-haspopup="listbox"
         className={`flex items-center gap-1.5 sm:gap-2 rounded-xl border px-2.5 sm:px-3.5 py-2.5 text-sm transition-colors ${
-          destaque
-            ? 'border-blue-600 bg-blue-600 text-white shadow-sm hover:bg-blue-700 hover:border-blue-700'
-            : ativo
-              ? 'border-blue-500 bg-blue-50 text-blue-700'
-              : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
+          ativo
+            ? 'border-blue-500 bg-blue-50 text-blue-700'
+            : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
         }`}
       >
-        <span className={destaque ? 'text-blue-100' : ativo ? 'text-blue-600' : 'text-slate-400'}>{icone}</span>
-        <span className={destaque ? 'text-blue-100' : 'text-slate-500'}>{label}:</span>
+        <span className={ativo ? 'text-blue-600' : 'text-slate-400'}>{icone}</span>
+        <span className="text-slate-500">{label}:</span>
         <span className="font-semibold whitespace-nowrap">{selecionada.label}</span>
-        <svg className={`w-4 h-4 shrink-0 transition-transform ${aberto ? 'rotate-180' : ''} ${destaque ? 'text-blue-100' : ativo ? 'text-blue-500' : 'text-slate-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className={`w-4 h-4 shrink-0 transition-transform ${aberto ? 'rotate-180' : ''} ${ativo ? 'text-blue-500' : 'text-slate-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
         </svg>
       </button>

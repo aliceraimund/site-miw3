@@ -4,6 +4,7 @@ import { createServerClient } from '@/lib/supabase/server'
 import ImovelCard from '@/components/ImovelCard'
 import WhatsAppFloat from '@/components/WhatsAppFloat'
 import FilterTabs from '@/components/FilterTabs'
+import { formatTitulo } from '@/lib/utils'
 import type { Imovel } from '@/types/imovel'
 import { ORIGEM_LABELS } from '@/types/imovel'
 
@@ -53,7 +54,8 @@ async function getCidadeGrupos(): Promise<{ label: string; variants: string[] }[
   }
 
   return [...grupos.values()]
-    .map((variants) => ({ label: escolherRotulo(variants), variants }))
+    // O rótulo é sempre normalizado: "SÃO CAETANO DO SUL" vira "São Caetano do Sul".
+    .map((variants) => ({ label: formatTitulo(escolherRotulo(variants)), variants }))
     .sort((a, b) => a.label.localeCompare(b.label, 'pt-BR'))
 }
 

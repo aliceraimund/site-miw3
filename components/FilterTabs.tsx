@@ -11,10 +11,10 @@ const CATEGORIAS: OpcaoFiltro[] = [
   { key: 'comercial', label: 'Comercial / Industrial' },
 ]
 
-const ORIGENS: OpcaoFiltro[] = [
-  { key: '', label: 'Todas' },
-  { key: 'propria', label: 'Carteira própria MIW3' },
-  { key: 'parceiro', label: 'Corretores parceiros' },
+const ORIGENS = [
+  { key: '', label: 'Todos' },
+  { key: 'propria', label: 'Carteira própria' },
+  { key: 'parceiro', label: 'Parceiros' },
 ]
 
 const ICONE_CARTEIRA = (
@@ -133,7 +133,24 @@ export default function FilterTabs({ activeCat, activeDisp, activeCidade, active
 
         {/* Linha 2: os quatro filtros, com a carteira em destaque */}
         <div className="flex flex-wrap gap-1.5 sm:gap-3 items-center">
-          <FiltroDropdown label="Carteira" icone={ICONE_CARTEIRA} opcoes={ORIGENS} valor={activeOrigem} onSelect={(v) => irPara('origem', v)} destaque />
+          {/* Carteira: botões (e não dropdown), para ficar sempre à vista */}
+          <div className="flex items-center gap-1 rounded-xl border border-blue-200 bg-blue-50 p-1">
+            <span className="text-blue-600 pl-1.5 pr-0.5">{ICONE_CARTEIRA}</span>
+            {ORIGENS.map((o) => (
+              <Link
+                key={o.key}
+                href={buildUrl({ ...atual, origem: o.key })}
+                scroll={false}
+                className={`px-3 py-1.5 rounded-lg text-sm font-semibold whitespace-nowrap transition-colors ${
+                  activeOrigem === o.key
+                    ? 'bg-blue-600 text-white shadow-sm'
+                    : 'text-blue-700 hover:bg-blue-100'
+                }`}
+              >
+                {o.label}
+              </Link>
+            ))}
+          </div>
           <FiltroDropdown label="Tipo" icone={ICONE_TIPO} opcoes={CATEGORIAS} valor={activeCat} onSelect={(v) => irPara('categoria', v)} />
           <FiltroDropdown label="Finalidade" icone={ICONE_FINALIDADE} opcoes={FINALIDADES} valor={activeDisp} onSelect={(v) => irPara('disponivel_para', v)} />
           {cidades.length > 0 && (
