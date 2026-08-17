@@ -1,6 +1,21 @@
 export type DisponibilidadeEnum = 'venda' | 'locacao' | 'ambos'
 export type StatusEnum = 'disponivel' | 'em_reforma' | 'em_construcao' | 'reservado'
 export type CategoriaEnum = 'residencial' | 'comercial' | 'industrial'
+// De quem é o imóvel anunciado: carteira própria da MIW3 ou corretor parceiro.
+export type OrigemEnum = 'propria' | 'parceiro'
+
+export const ORIGEM_LABELS: Record<OrigemEnum, string> = {
+  propria: 'Imóvel de Carteira Própria',
+  parceiro: 'Imóvel de Corretores Parceiros',
+}
+
+// Aviso exibido dentro do anúncio, conforme a origem.
+export const ORIGEM_AVISOS: Record<OrigemEnum, string> = {
+  propria:
+    'Imóveis de propriedade da MIW3. Corretores e imobiliárias estão autorizados a divulgar em seus canais. Não há participação de corretor intermediário na comissão.',
+  parceiro:
+    'Imóveis de corretores parceiros. As condições de parceria, comissão e visitas devem ser alinhadas diretamente com o corretor responsável informado no anúncio.',
+}
 
 export interface Imovel {
   id: string
@@ -30,5 +45,6 @@ export interface Imovel {
   whatsapp: string | null
   ordem: number | null
   gerido: boolean
+  origem: OrigemEnum
   criado_em: string
 }

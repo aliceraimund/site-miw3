@@ -48,6 +48,11 @@ export default function ImovelCard({ imovel }: Props) {
               Destaque
             </span>
           )}
+          {imovel.origem === 'parceiro' && (
+            <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-teal-100 text-teal-800">
+              Corretor parceiro
+            </span>
+          )}
         </div>
         <div className="absolute top-3 right-3">
           <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${DISPONIVEL_COLORS[imovel.disponivel_para]}`}>

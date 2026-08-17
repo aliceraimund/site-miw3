@@ -9,6 +9,7 @@ import WhatsAppFloat from '@/components/WhatsAppFloat'
 import ShareButton from '@/components/ShareButton'
 import { formatArea, formatTitulo, STATUS_LABELS, STATUS_COLORS, DISPONIVEL_LABELS, DISPONIVEL_COLORS } from '@/lib/utils'
 import type { Imovel } from '@/types/imovel'
+import { ORIGEM_AVISOS, ORIGEM_LABELS } from '@/types/imovel'
 
 const PHONE = '5511972793005'
 const SITE_URL = 'https://miw3.com.br'
@@ -60,6 +61,9 @@ export default async function ImovelPage({ params }: { params: Promise<{ id: str
 
   const i = imovel
   const phone = i.whatsapp || PHONE
+  // Anúncios criados antes deste campo valem como carteira própria.
+  const origem = i.origem ?? 'propria'
+  const parceiro = origem === 'parceiro'
 
   // Evita duplicar a política quando o texto já foi digitado manualmente na descrição.
   const normalizar = (s: string) => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
@@ -124,6 +128,9 @@ export default async function ImovelPage({ params }: { params: Promise<{ id: str
                   Destaque
                 </span>
               )}
+              <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${parceiro ? 'bg-teal-100 text-teal-800' : 'bg-slate-200 text-slate-700'}`}>
+                {parceiro ? 'Corretor parceiro' : 'Carteira própria MIW3'}
+              </span>
             </div>
 
             <p className="text-sm font-semibold text-blue-600 uppercase tracking-wider mb-1">{i.tipo}</p>
@@ -181,6 +188,23 @@ export default async function ImovelPage({ params }: { params: Promise<{ id: str
                 </ul>
               </div>
             )}
+          </div>
+
+          {/* Aviso de origem — carteira própria x corretor parceiro */}
+          <div className={`rounded-xl p-5 border ${parceiro ? 'bg-teal-50 border-teal-200' : 'bg-slate-50 border-slate-200'}`}>
+            <div className="flex items-start gap-3">
+              <svg className={`w-5 h-5 shrink-0 mt-0.5 ${parceiro ? 'text-teal-600' : 'text-slate-500'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <div>
+                <h2 className={`font-semibold text-sm ${parceiro ? 'text-teal-900' : 'text-slate-900'}`}>
+                  {ORIGEM_LABELS[origem]}
+                </h2>
+                <p className={`text-sm leading-relaxed mt-1 ${parceiro ? 'text-teal-900/80' : 'text-slate-600'}`}>
+                  {ORIGEM_AVISOS[origem]}
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 

@@ -4,9 +4,11 @@ import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import RetryImage from '@/components/RetryImage'
-import type { Imovel, DisponibilidadeEnum, StatusEnum, CategoriaEnum } from '@/types/imovel'
+import type { Imovel, DisponibilidadeEnum, StatusEnum, CategoriaEnum, OrigemEnum } from '@/types/imovel'
+import { ORIGEM_AVISOS, ORIGEM_LABELS } from '@/types/imovel'
 
-type FormData = Omit<Imovel, 'id' | 'criado_em'>
+// `origem` começa vazia em anúncios novos: a escolha é obrigatória.
+type FormData = Omit<Imovel, 'id' | 'criado_em' | 'origem'> & { origem: OrigemEnum | null }
 
 const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp']
 
@@ -41,6 +43,7 @@ const INITIAL: FormData = {
   whatsapp: null,
   ordem: null,
   gerido: false,
+  origem: null,
 }
 
 function Field({ label, children, required, hint }: { label: string; children: React.ReactNode; required?: boolean; hint?: string }) {
@@ -137,11 +140,18 @@ export default function AdminImovelForm({ imovel }: Props) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setSaving(true)
     setError('')
 
+    if (!form.origem) {
+      setError('Escolha se o imóvel é de carteira própria da MIW3 ou de corretor parceiro.')
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+      return
+    }
+
+    setSaving(true)
+
     const supabase = createClient()
-    const payload = { ...form, fotos: fotos.length > 0 ? fotos : null }
+    const payload = { ...form, origem: form.origem, fotos: fotos.length > 0 ? fotos : null }
 
     let err
     if (isEditing) {
@@ -186,6 +196,35 @@ export default function AdminImovelForm({ imovel }: Props) {
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-sm">{error}</div>
       )}
+
+      <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-5">
+        <h2 className="font-semibold text-slate-900 text-base border-b border-slate-100 pb-3">Origem do imóvel</h2>
+
+        <Field label="De quem é este imóvel" required hint="Define o aviso exibido dentro do anúncio e o filtro na página inicial.">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-1">
+            {(['propria', 'parceiro'] as OrigemEnum[]).map((op) => (
+              <button
+                key={op}
+                type="button"
+                onClick={() => set('origem', op)}
+                className={`text-left rounded-lg border px-4 py-3 transition-colors ${
+                  form.origem === op
+                    ? 'border-blue-600 bg-blue-50 ring-1 ring-blue-600'
+                    : 'border-slate-300 hover:border-slate-400'
+                }`}
+              >
+                <span className={`block text-sm font-semibold ${form.origem === op ? 'text-blue-700' : 'text-slate-700'}`}>
+                  {ORIGEM_LABELS[op]}
+                </span>
+                <span className="block text-xs text-slate-500 mt-1 leading-snug">{ORIGEM_AVISOS[op]}</span>
+              </button>
+            ))}
+          </div>
+          {!form.origem && (
+            <p className="text-xs text-amber-700 mt-2">Escolha uma das opções para salvar o anúncio.</p>
+          )}
+        </Field>
+      </div>
 
       <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-5">
         <h2 className="font-semibold text-slate-900 text-base border-b border-slate-100 pb-3">Informações básicas</h2>

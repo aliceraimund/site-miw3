@@ -5,11 +5,13 @@ import ImovelCard from '@/components/ImovelCard'
 import WhatsAppFloat from '@/components/WhatsAppFloat'
 import FilterTabs from '@/components/FilterTabs'
 import type { Imovel } from '@/types/imovel'
+import { ORIGEM_LABELS } from '@/types/imovel'
 
 interface SearchParams {
   categoria?: string
   disponivel_para?: string
   cidade?: string
+  origem?: string
   q?: string
 }
 
@@ -84,11 +86,13 @@ async function Listings({
   activeCat,
   activeDisp,
   activeCidade,
+  activeOrigem,
   activeQ,
 }: {
   activeCat: string
   activeDisp: string
   activeCidade: string
+  activeOrigem: string
   activeQ: string
 }) {
   const categoria = CATEGORIAS.find((c) => c.tabKey === activeCat)
@@ -105,6 +109,10 @@ async function Listings({
 
   if (categoria) {
     query = query.in('categoria', categoria.keys)
+  }
+
+  if (activeOrigem === 'propria' || activeOrigem === 'parceiro') {
+    query = query.eq('origem', activeOrigem)
   }
 
   if (activeCidade) {
@@ -160,7 +168,15 @@ async function Listings({
           <h2 className="text-xl font-bold text-slate-900">
             {activeQ ? `Resultados para "${activeQ}"` : activeCidade ? `Imóveis em ${activeCidade}` : categoria ? categoria.label : 'Todos os imóveis'}
           </h2>
-          <p className="text-sm text-slate-500">{categoria ? categoria.desc : 'Residenciais, comerciais e industriais para venda e locação'}</p>
+          <p className="text-sm text-slate-500">
+            {activeOrigem === 'propria'
+              ? ORIGEM_LABELS.propria
+              : activeOrigem === 'parceiro'
+                ? ORIGEM_LABELS.parceiro
+                : categoria
+                  ? categoria.desc
+                  : 'Residenciais, comerciais e industriais para venda e locação'}
+          </p>
         </div>
         <span className="ml-auto text-xs font-semibold text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full">
           {imoveis.length} {imoveis.length === 1 ? 'imóvel' : 'imóveis'}
@@ -184,6 +200,7 @@ export default async function HomePage({
   const activeCat = sp.categoria ?? ''
   const activeDisp = sp.disponivel_para ?? ''
   const activeCidade = sp.cidade ?? ''
+  const activeOrigem = sp.origem ?? ''
   const activeQ = sp.q ?? ''
   const cidades = (await getCidadeGrupos()).map((g) => g.label)
 
@@ -250,19 +267,19 @@ export default async function HomePage({
       </div>
 
       {/* Filter bar */}
-      <FilterTabs activeCat={activeCat} activeDisp={activeDisp} activeCidade={activeCidade} activeQ={activeQ} cidades={cidades} />
+      <FilterTabs activeCat={activeCat} activeDisp={activeDisp} activeCidade={activeCidade} activeOrigem={activeOrigem} activeQ={activeQ} cidades={cidades} />
 
       {/* Listings */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <Suspense
-          key={`${activeCat}|${activeDisp}|${activeCidade}|${activeQ}`}
+          key={`${activeCat}|${activeDisp}|${activeCidade}|${activeOrigem}|${activeQ}`}
           fallback={
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {[...Array(6)].map((_, i) => <div key={i} className="bg-white rounded-xl h-80 animate-pulse shadow-sm" />)}
             </div>
           }
         >
-          <Listings activeCat={activeCat} activeDisp={activeDisp} activeCidade={activeCidade} activeQ={activeQ} />
+          <Listings activeCat={activeCat} activeDisp={activeDisp} activeCidade={activeCidade} activeOrigem={activeOrigem} activeQ={activeQ} />
         </Suspense>
       </div>
 
