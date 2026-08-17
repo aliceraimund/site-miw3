@@ -53,9 +53,13 @@ async function getCidadeGrupos(): Promise<{ label: string; variants: string[] }[
     return [...pool2].sort((a, b) => a.length - b.length)[0]
   }
 
+  // O rótulo é sempre normalizado ("SÃO CAETANO DO SUL" vira "São Caetano do
+  // Sul") e termina em ", SP" — todas as cidades atendidas são do estado.
+  const rotular = (variants: string[]): string =>
+    `${formatTitulo(escolherRotulo(variants)).replace(/[\s,]+sp\.?$/i, '').trim()}, SP`
+
   return [...grupos.values()]
-    // O rótulo é sempre normalizado: "SÃO CAETANO DO SUL" vira "São Caetano do Sul".
-    .map((variants) => ({ label: formatTitulo(escolherRotulo(variants)), variants }))
+    .map((variants) => ({ label: rotular(variants), variants }))
     .sort((a, b) => a.label.localeCompare(b.label, 'pt-BR'))
 }
 
