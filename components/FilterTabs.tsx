@@ -11,11 +11,17 @@ const CATEGORIAS: OpcaoFiltro[] = [
   { key: 'comercial', label: 'Comercial / Industrial' },
 ]
 
-const ORIGENS = [
-  { key: '', label: 'Todos', title: 'Todos os imóveis do site' },
-  { key: 'propria', label: 'Carteira própria', title: 'Imóveis de propriedade da MIW3' },
-  { key: 'parceiro', label: 'Parceiros', title: 'Imóveis de corretores parceiros' },
+const ORIGENS: OpcaoFiltro[] = [
+  { key: '', label: 'Todas' },
+  { key: 'propria', label: 'Carteira própria MIW3' },
+  { key: 'parceiro', label: 'Corretores parceiros' },
 ]
+
+const ICONE_CARTEIRA = (
+  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+  </svg>
+)
 
 const FINALIDADES: OpcaoFiltro[] = [
   { key: '', label: 'Todas' },
@@ -90,9 +96,9 @@ export default function FilterTabs({ activeCat, activeDisp, activeCidade, active
     <div className="bg-white border-b border-slate-200 sticky top-0 z-30">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 space-y-3">
 
-        {/* Linha 1: busca + carteira (própria x parceiros) */}
-        <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
-          <div className="relative flex-1">
+        {/* Linha 1: busca */}
+        <div>
+          <div className="relative">
             <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z" />
             </svg>
@@ -123,25 +129,11 @@ export default function FilterTabs({ activeCat, activeDisp, activeCidade, active
             )}
           </div>
 
-          <div className="flex bg-slate-100 rounded-xl p-1 shrink-0 self-start sm:self-auto">
-            {ORIGENS.map((o) => (
-              <Link
-                key={o.key}
-                href={buildUrl({ ...atual, origem: o.key })}
-                scroll={false}
-                title={o.title}
-                className={`px-3.5 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
-                  activeOrigem === o.key ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                {o.label}
-              </Link>
-            ))}
-          </div>
         </div>
 
-        {/* Linha 2: filtros em dropdown */}
-        <div className="flex flex-wrap gap-2 sm:gap-3 items-center">
+        {/* Linha 2: os quatro filtros, com a carteira em destaque */}
+        <div className="flex flex-wrap gap-1.5 sm:gap-3 items-center">
+          <FiltroDropdown label="Carteira" icone={ICONE_CARTEIRA} opcoes={ORIGENS} valor={activeOrigem} onSelect={(v) => irPara('origem', v)} destaque />
           <FiltroDropdown label="Tipo" icone={ICONE_TIPO} opcoes={CATEGORIAS} valor={activeCat} onSelect={(v) => irPara('categoria', v)} />
           <FiltroDropdown label="Finalidade" icone={ICONE_FINALIDADE} opcoes={FINALIDADES} valor={activeDisp} onSelect={(v) => irPara('disponivel_para', v)} />
           {cidades.length > 0 && (
